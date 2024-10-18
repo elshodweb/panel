@@ -1,0 +1,41 @@
+.addBtn {
+  display: flex;
+  align-items: center;
+  background-color: #1e293b;
+  color: white;
+  padding: 8px 20px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: background-color 0.3s;
+}
+
+.addBtn:hover {
+  background-color: #2f415d;
+}
+
+.icon {
+  margin-right: 8px;
+}
+@media (max-width: 700px) {
+  .addBtn {
+    padding: 15px;
+    display: block;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    span {
+      display: none;
+    }
+  }
+  .icon {
+    margin-right: 0;
+  }
+}
+@media (max-width: 530px) {
+  .addBtn {
+    font-size: 12px;
+    padding: 10px;
+  }
+}

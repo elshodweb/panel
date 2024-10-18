@@ -1,0 +1,15 @@
+/* Dashboard.module.css */
+
+.dashboard {
+  padding: 20px;
+  background-color: #f3f4f6; /* Light background for the main content */
+  flex-grow: 1; /* Take remaining space */
+  height: 100vh; /* Full height to match the sidebar */
+  overflow-y: auto; /* Scrollable if content overflows */
+}
+
+.dashboard div {
+  font-size: 18px;
+  font-weight: 500;
+  color: #374151;
+}

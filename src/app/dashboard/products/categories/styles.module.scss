@@ -1,0 +1,35 @@
+.wrapper {
+  padding-top: 55px;
+}
+.row {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: 10px;
+  position: fixed;
+  top: 0px;
+  width: calc(100% - 100px);
+  background: #fff;
+  z-index: 2;
+  padding: 15px;
+  gap: 10px;
+}
+.right {
+  display: flex;
+  gap: 5px;
+  width: 100%;
+  // flex-wrap: wrap;
+  justify-content: flex-end;
+}
+@media (max-width: 530px) {
+  .row {
+    flex-wrap: wrap;
+    padding: 5px;
+  }
+  .right {
+    justify-content: flex-start;
+  }
+  .wrapper {
+    padding-top: 100px;
+  }
+}
