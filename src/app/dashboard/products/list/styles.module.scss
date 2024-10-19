@@ -1,7 +1,6 @@
 .wrapper {
   padding-top: 55px;
 }
-
 .row {
   display: flex;
   align-items: flex-start;
@@ -15,26 +14,20 @@
   padding: 15px;
   gap: 10px;
 }
-
 .right {
   display: flex;
   gap: 5px;
   width: 100%;
   justify-content: flex-end;
 }
-
-
-
 @media (max-width: 530px) {
   .row {
     flex-wrap: wrap;
     padding: 5px;
   }
-
   .right {
     justify-content: flex-start;
   }
-
   .wrapper {
     padding-top: 100px;
   }

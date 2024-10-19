@@ -1,8 +1,6 @@
 import axiosInstance from "@/utils/axiosInstance";
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
-import axios from "axios";
 
-// Типы данных
 interface ProductCategory {
   id: string;
   title: string;
@@ -24,7 +22,6 @@ interface ProductCategoryState {
   error: string | null;
 }
 
-// Начальное состояние
 const initialState: ProductCategoryState = {
   categories: [],
   pagination: {
@@ -37,7 +34,6 @@ const initialState: ProductCategoryState = {
   error: null,
 };
 
-// Асинхронное действие для получения данных с API
 export const fetchProductCategories = createAsyncThunk(
   "productCategories/fetchProductCategories",
   async (params: { title: string; pageNumber: number; pageSize: number }) => {
@@ -48,13 +44,10 @@ export const fetchProductCategories = createAsyncThunk(
   }
 );
 
-// Создание слайса
 const productCategorySlice = createSlice({
   name: "productCategories",
   initialState,
-  reducers: {
-    // Можно добавить редьюсеры для других действий, если потребуется
-  },
+  reducers: {},
   extraReducers: (builder) => {
     builder
       .addCase(fetchProductCategories.pending, (state) => {
@@ -62,7 +55,7 @@ const productCategorySlice = createSlice({
       })
       .addCase(fetchProductCategories.fulfilled, (state, action) => {
         state.status = "succeeded";
-        state.categories = action.payload.results; // Записываем категории продуктов
+        state.categories = action.payload.results;
         state.pagination = {
           currentPage: parseInt(action.payload.pagination.currentPage),
           totalPages: action.payload.pagination.totalPages,
@@ -77,5 +70,4 @@ const productCategorySlice = createSlice({
   },
 });
 
-// Экспорт действий и редьюсера
 export default productCategorySlice.reducer;

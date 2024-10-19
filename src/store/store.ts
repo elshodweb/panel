@@ -1,14 +1,14 @@
-// src/store/store.ts
 import { configureStore } from "@reduxjs/toolkit";
 import { combineReducers } from "@reduxjs/toolkit";
 
-// Импорт вашего слайса
 import productCategoryReducer from "@/features/productCategory/productCategorySlice";
+import productReducer from "@/features/products/products";
+import allCategoriesReducer from "@/features/productCategory/allCategories";
 
-// Комбинирование редьюсеров
 const rootReducer = combineReducers({
-  // Добавление productCategorySlice в корневой редьюсер
   productCategories: productCategoryReducer,
+  allCategories: allCategoriesReducer,
+  products: productReducer,
 });
 
 const store = configureStore({

@@ -1,50 +1,50 @@
 import React from "react";
-import styles from "./Pagination.module.scss"; // Импортируем стили
+import styles from "./Pagination.module.scss";
+import { FormControl, MenuItem, Pagination, Select } from "@mui/material";
 
 interface PaginationProps {
   currentPage: number;
   totalPages: number;
-  onPageChange: (page: number) => void;
+  onPageChange: (event: any, page: number) => void;
+  pageSize: number;
+  setPageSize: (n: number) => void;
 }
 
-const Pagination: React.FC<PaginationProps> = ({
+const MyPagination: React.FC<PaginationProps> = ({
   currentPage,
   totalPages,
   onPageChange,
+  pageSize,
+  setPageSize,
 }) => {
-  const handlePageClick = (page: number) => {
-    if (page >= 1 && page <= totalPages) {
-      onPageChange(page);
-    }
-  };
-  if (totalPages === 0) {
+  if (totalPages < 2) {
     return "";
   }
   return (
-    <div className={styles.pagination}>
-      <button
-        onClick={() => handlePageClick(currentPage - 1)}
-        disabled={currentPage === 1}
-      >
-        Prev
-      </button>
-      {Array.from({ length: totalPages }, (_, index) => (
-        <button
-          key={index}
-          onClick={() => handlePageClick(index + 1)}
-          className={currentPage === index + 1 ? styles.active : ""}
+    <div className={styles.paginationWrapper}>
+      <Pagination
+        count={totalPages}
+        page={currentPage}
+        size="small"
+        siblingCount={0}
+        onChange={onPageChange}
+      />
+
+      <FormControl className={styles.pageSizeControl}>
+        <Select
+          size="small"
+          labelId="page-size-label"
+          value={pageSize}
+          onChange={(e) => setPageSize(Number(e.target.value))}
         >
-          {index + 1}
-        </button>
-      ))}
-      <button
-        onClick={() => handlePageClick(currentPage + 1)}
-        disabled={currentPage === totalPages}
-      >
-        Next
-      </button>
+          <MenuItem value={5}>5</MenuItem>
+          <MenuItem value={10}>10</MenuItem>
+          <MenuItem value={20}>20</MenuItem>
+          <MenuItem value={20}>100</MenuItem>
+        </Select>
+      </FormControl>
     </div>
   );
 };
 
-export default Pagination;
+export default MyPagination;

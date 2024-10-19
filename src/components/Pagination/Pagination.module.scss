@@ -1,36 +1,12 @@
-.pagination {
+.paginationWrapper {
   display: flex;
-  justify-content: center;
   align-items: center;
-  gap: 8px;
-  margin: 20px 0;
+  justify-content: flex-end;
+  margin-top: 10px;
+  gap: 10px;
+  flex-wrap: wrap;
+}
 
-  button {
-    padding: 8px 12px;
-    border: 1px solid #1e293b; // Цвет рамки заменён на #1e293b
-    border-radius: 4px;
-    background-color: white; // Цвет фона кнопки
-    color: #1e293b; // Цвет текста заменён на #1e293b
-    cursor: pointer;
-    transition: background-color 0.3s, color 0.3s;
-
-    &:disabled {
-      cursor: not-allowed;
-      opacity: 0.5; // Более заметное понижение непрозрачности для отключенных кнопок
-      background-color: #e2e8f0; // Светло-серый фон для отключённых кнопок
-      color: #616c7c; // Серый текст для отключённых кнопок
-      border-color: #94a3b8; // Серый цвет рамки для отключённых кнопок
-    }
-
-    &:hover:not(:disabled) {
-      background-color: #1e293b; // Цвет фона при наведении
-      color: white; // Белый текст при наведении
-    }
-
-    &.active {
-      font-weight: bold;
-      background-color: #1e293b; // Цвет фона для активной кнопки
-      color: white; // Белый текст для активной кнопки
-    }
-  }
+.pageSizeControl {
+  min-width: 100px;
 }

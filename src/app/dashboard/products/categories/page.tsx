@@ -2,17 +2,24 @@
 
 import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import axiosInstance from "@/utils/axiosInstance"; // Импортируем экземпляр axios
+import axiosInstance from "@/utils/axiosInstance";
 import CustomTable from "@/components/Table/Table";
 import Title from "@/components/Title/Title";
 import Modal from "@/components/Modal/Modal";
 import { RootState, AppDispatch } from "@/store/store";
 import { fetchProductCategories } from "@/features/productCategory/productCategorySlice";
-import Pagination from "@/components/Pagination/Pagination";
-import { FaFolderPlus, FaSearch } from "react-icons/fa";
+import {
+  Pagination,
+  Select,
+  MenuItem,
+  FormControl,
+  InputLabel,
+} from "@mui/material";
 import styles from "./styles.module.scss";
 import Search from "@/components/Search/Search";
 import AddBtn from "@/components/Buttons/AddBtn/AddBtn";
+import MyPagination from "@/components/Pagination/Pagination";
+
 const Page = () => {
   const dispatch = useDispatch<AppDispatch>();
   const { categories, status, error, pagination } = useSelector(
@@ -25,11 +32,13 @@ const Page = () => {
   const [formData, setFormData] = useState({ title: "" });
   const [isConfirmDeleteOpen, setIsConfirmDeleteOpen] = useState(false);
   const [search, setSearch] = useState("");
+  const [pageSize, setPageSize] = useState(10);
+
   useEffect(() => {
     dispatch(
-      fetchProductCategories({ title: search, pageNumber: 1, pageSize: 10 })
+      fetchProductCategories({ title: search, pageNumber: 1, pageSize })
     );
-  }, [dispatch]);
+  }, [dispatch, pageSize]);
 
   const handleDelete = async () => {
     if (!selectedCategory) return;
@@ -41,7 +50,7 @@ const Page = () => {
 
       if (response.status < 300) {
         dispatch(
-          fetchProductCategories({ title: search, pageNumber: 1, pageSize: 10 })
+          fetchProductCategories({ title: search, pageNumber: 1, pageSize })
         );
         setIsConfirmDeleteOpen(false);
       } else {
@@ -86,7 +95,7 @@ const Page = () => {
         response.status === 204
       ) {
         dispatch(
-          fetchProductCategories({ title: search, pageNumber: 1, pageSize: 10 })
+          fetchProductCategories({ title: search, pageNumber: 1, pageSize })
         );
         setIsModalOpen(false);
       } else {
@@ -97,12 +106,12 @@ const Page = () => {
     }
   };
 
-  const titles = ["title"];
+  const titles = ["Nomi"];
 
   return (
     <div className={styles.wrapper}>
       <div className={styles.row}>
-        <Title>Categories</Title>
+        <Title>Categoriyalar</Title>
         <div className={styles.right}>
           <AddBtn onClick={handleCreate} />
           <Search
@@ -112,7 +121,7 @@ const Page = () => {
                 fetchProductCategories({
                   title: search,
                   pageNumber: pagination.currentPage,
-                  pageSize: 10,
+                  pageSize,
                 })
               );
             }}
@@ -126,31 +135,39 @@ const Page = () => {
       {status === "succeeded" && (
         <>
           <CustomTable
+            keys={["title"]}
             titles={titles}
             data={categories}
             onDelete={(category) => {
               setSelectedCategory(category);
-              setIsConfirmDeleteOpen(true); // Открываем модалку подтверждения
+              setIsConfirmDeleteOpen(true);
             }}
             onUpdate={handleUpdate}
           />
-          <Pagination
+
+          <MyPagination
             currentPage={pagination.currentPage}
-            totalPages={pagination.totalPages}
-            onPageChange={(page) => {
+            onPageChange={(event, page) => {
               dispatch(
                 fetchProductCategories({
                   title: search,
                   pageNumber: page,
-                  pageSize: 10,
+                  pageSize,
                 })
               );
             }}
+            pageSize={pageSize}
+            setPageSize={setPageSize}
+            totalPages={pagination.totalPages}
           />
+
+          {/* Модальное окно для создания/редактирования */}
           <Modal
             isOpen={isModalOpen}
             onClose={() => setIsModalOpen(false)}
-            title={isEditMode ? "Edit Category" : "Create Category"}
+            title={
+              isEditMode ? "Categoriya o'zgartirish" : "Categoriya yaratish"
+            }
           >
             <form onSubmit={handleFormSubmit}>
               <input
@@ -159,22 +176,25 @@ const Page = () => {
                 onChange={(e) =>
                   setFormData({ ...formData, title: e.target.value })
                 }
-                placeholder="Category Title"
+                placeholder="Categoriya nomi"
                 required
               />
-              <button type="submit">{isEditMode ? "Update" : "Create"}</button>
+              <button type="submit">
+                {isEditMode ? "O'zgartirish" : "Yaratish"}
+              </button>
             </form>
           </Modal>
 
+          {/* Модальное окно для подтверждения удаления */}
           <Modal
             isOpen={isConfirmDeleteOpen}
             onClose={() => setIsConfirmDeleteOpen(false)}
-            title="Confirm Delete"
+            title="O'chirishni Tasdiqlash"
           >
-            <p>Are you sure you want to delete this category?</p>
-            <button onClick={handleDelete}>Yes, Delete</button>
+            <p>Ushbu kategoriyani o‘chirishga ishonchingiz komilmi?</p>
+            <button onClick={handleDelete}>Ha, O'chirish</button>
             <button onClick={() => setIsConfirmDeleteOpen(false)}>
-              Cancel
+              Bekor qilish
             </button>
           </Modal>
         </>

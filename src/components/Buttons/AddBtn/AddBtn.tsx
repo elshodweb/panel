@@ -10,7 +10,7 @@ const AddBtn = ({
   return (
     <button className={styles.addBtn} onClick={onClick}>
       <FaFolderPlus className={styles.icon} />
-      <span> New Category</span>
+      <span>Yaratish</span>
     </button>
   );
 };
