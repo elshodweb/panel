@@ -15,30 +15,30 @@ const CustomTable: FC<CustomTableProps> = ({
   onDelete,
   onUpdate,
 }) => {
-  console.log("====================================");
-  console.log(data);
-  console.log("====================================");
-  if (data?.length < 1){
-    return 'no data'
+  if (data?.length < 1) {
+    return "no data";
   }
-    return (
-      <div className={styles.tableWrapper}>
-        <table className={styles.table}>
-          <thead>
-            <tr>
+  return (
+    <div className={styles.tableWrapper}>
+      <table className={styles.table}>
+        <thead>
+          <tr>
+            {titles.map((title, index) => (
+              <th  key={index}>
+                {title}
+              </th>
+            ))}
+            <th className={styles.actionsTitle}>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {data.map((row, rowIndex) => (
+            <tr key={rowIndex}>
               {titles.map((title, index) => (
-                <th key={index}>{title}</th>
+                <td key={index}>{row[title]}</td>
               ))}
-              <th>Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {data.map((row, rowIndex) => (
-              <tr key={rowIndex}>
-                {titles.map((title, index) => (
-                  <td key={index}>{row[title]}</td>
-                ))}
-                <td className={styles.actions}>
+              <td>
+                <div className={styles.actions}>
                   <button onClick={() => onUpdate(row)}>
                     <FaEdit />
                   </button>
@@ -46,13 +46,14 @@ const CustomTable: FC<CustomTableProps> = ({
                     <FaTrash />
                   </button>{" "}
                   {/* Передаем всю категорию */}
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-    );
+                </div>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  );
 };
 
 export default CustomTable;

@@ -30,7 +30,6 @@
     position: sticky;
     top: 0;
     background-color: #f8f8f8;
-    
   }
 
   th,
@@ -43,12 +42,15 @@
   th {
     background-color: #f4f4f4;
     font-weight: bold;
+    text-transform: capitalize;
   }
 
   tr:hover {
     background-color: #f1f1f1;
   }
-
+  .actionsTitle {
+    width: 70px;
+  }
   .actions {
     display: flex;
     gap: 10px;

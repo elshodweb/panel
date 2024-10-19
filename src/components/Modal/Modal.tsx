@@ -1,5 +1,5 @@
 import React from "react";
-import { MdClose } from "react-icons/md"; // Импортируем иконку "X" из react-icons
+import { MdClose } from "react-icons/md"; 
 import styles from "./Modal.module.scss";
 
 interface ModalProps {
