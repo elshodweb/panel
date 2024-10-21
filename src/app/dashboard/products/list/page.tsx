@@ -1,5 +1,5 @@
 "use client";
-import React, { useEffect, useState } from "react";
+import React, { forwardRef, useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import axiosInstance from "@/utils/axiosInstance";
 import CustomTable from "@/components/Table/Table";
@@ -12,8 +12,13 @@ import Search from "@/components/Search/Search";
 import AddBtn from "@/components/Buttons/AddBtn/AddBtn";
 import MyPagination from "@/components/Pagination/Pagination";
 import { fetchAllCategories } from "@/features/productCategory/allCategories";
-import { Autocomplete, TextField } from "@mui/material";
-
+import { Autocomplete, Snackbar, TextField } from "@mui/material";
+import MuiAlert from "@mui/material/Alert";
+const Alert = forwardRef<HTMLDivElement, React.ComponentProps<typeof MuiAlert>>(
+  function Alert(props, ref) {
+    return <MuiAlert elevation={6} ref={ref} variant="filled" {...props} />;
+  }
+);
 const Page = () => {
   const dispatch = useDispatch<AppDispatch>();
   const { products, status, error, pagination } = useSelector(
@@ -25,7 +30,11 @@ const Page = () => {
     error: CError,
     status: CStatus,
   } = useSelector((state: RootState) => state.allCategories);
-
+  const [snackbarOpen, setSnackbarOpen] = useState(false);
+  const [snackbarMessage, setSnackbarMessage] = useState("");
+  const [snackbarSeverity, setSnackbarSeverity] = useState<"success" | "error">(
+    "success"
+  );
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isEditMode, setIsEditMode] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState<any>(null);
@@ -61,6 +70,21 @@ const Page = () => {
     dispatch(fetchAllCategories());
   }, [dispatch]);
 
+  const showSnackbar = (message: string, severity: "success" | "error") => {
+    setSnackbarMessage(message);
+    setSnackbarSeverity(severity);
+    setSnackbarOpen(true);
+  };
+  const handleSnackbarClose = (
+    event?: React.SyntheticEvent | Event,
+    reason?: string
+  ) => {
+    if (reason === "clickaway") {
+      return;
+    }
+    setSnackbarOpen(false);
+  };
+
   const handleDelete = async () => {
     if (!selectedProduct) return;
 
@@ -80,11 +104,12 @@ const Page = () => {
           })
         );
         setIsConfirmDeleteOpen(false);
+        showSnackbar("Kategoriya muvaffaqiyatli oʻchirildi", "success");
       } else {
-        console.error("Error deleting product:", response.statusText);
+        showSnackbar("Kategoriyani o‘chirib bo‘lmadi", "error");
       }
     } catch (error) {
-      console.error("Error deleting product:", error);
+      showSnackbar("Kategoriyani oʻchirishda xatolik yuz berdi", "error");
     }
   };
 
@@ -166,11 +191,17 @@ const Page = () => {
           })
         );
         setIsModalOpen(false);
+        showSnackbar(
+          isEditMode
+            ? "Kategoriya muvaffaqiyatli yangilandi"
+            : "Kategoriya muvaffaqiyatli qo'shildi",
+          "success"
+        );
       } else {
-        console.error("Error saving product:", response.statusText);
+        showSnackbar("Kategoriya saqlanmadi", "error");
       }
     } catch (error) {
-      console.error("Error saving product:", error);
+      showSnackbar("Kategoriyani saqlanishida hato ketdi", "error");
     }
   };
 
@@ -255,7 +286,7 @@ const Page = () => {
             <TextField
               {...params}
               key={params.inputProps.id}
-              label="Categoriya"
+              label="Kategoriya"
             />
           )}
         />
@@ -445,6 +476,16 @@ const Page = () => {
               Bekor qilish
             </button>
           </Modal>
+
+          <Snackbar
+            open={snackbarOpen}
+            autoHideDuration={6000}
+            onClose={handleSnackbarClose}
+          >
+            <Alert onClose={handleSnackbarClose} severity={snackbarSeverity}>
+              {snackbarMessage}
+            </Alert>
+          </Snackbar>
         </>
       )}
     </div>

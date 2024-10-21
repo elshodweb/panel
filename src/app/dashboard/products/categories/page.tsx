@@ -1,5 +1,5 @@
 "use client";
-import React, { useEffect, useState } from "react";
+import React, { forwardRef, useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import axiosInstance from "@/utils/axiosInstance";
 import CustomTable from "@/components/Table/Table";
@@ -11,13 +11,25 @@ import styles from "./styles.module.scss";
 import Search from "@/components/Search/Search";
 import AddBtn from "@/components/Buttons/AddBtn/AddBtn";
 import MyPagination from "@/components/Pagination/Pagination";
+import Snackbar from "@mui/material/Snackbar";
+import MuiAlert from "@mui/material/Alert";
+
+const Alert = forwardRef<HTMLDivElement, React.ComponentProps<typeof MuiAlert>>(
+  function Alert(props, ref) {
+    return <MuiAlert elevation={6} ref={ref} variant="filled" {...props} />;
+  }
+);
 
 const Page = () => {
   const dispatch = useDispatch<AppDispatch>();
   const { categories, status, error, pagination } = useSelector(
     (state: RootState) => state.productCategories
   );
-
+  const [snackbarOpen, setSnackbarOpen] = useState(false);
+  const [snackbarMessage, setSnackbarMessage] = useState("");
+  const [snackbarSeverity, setSnackbarSeverity] = useState<"success" | "error">(
+    "success"
+  );
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isEditMode, setIsEditMode] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState<any>(null);
@@ -31,6 +43,21 @@ const Page = () => {
       fetchProductCategories({ title: search, pageNumber: 1, pageSize })
     );
   }, [dispatch, pageSize]);
+  const handleSnackbarClose = (
+    event?: React.SyntheticEvent | Event,
+    reason?: string
+  ) => {
+    if (reason === "clickaway") {
+      return;
+    }
+    setSnackbarOpen(false);
+  };
+
+  const showSnackbar = (message: string, severity: "success" | "error") => {
+    setSnackbarMessage(message);
+    setSnackbarSeverity(severity);
+    setSnackbarOpen(true);
+  };
 
   const handleDelete = async () => {
     if (!selectedCategory) return;
@@ -45,11 +72,12 @@ const Page = () => {
           fetchProductCategories({ title: search, pageNumber: 1, pageSize })
         );
         setIsConfirmDeleteOpen(false);
+        showSnackbar("Kategoriya muvaffaqiyatli oʻchirildi", "success");
       } else {
-        console.error("Failed to delete category:", response.statusText);
+        showSnackbar("Kategoriyani o‘chirib bo‘lmadi", "error");
       }
     } catch (error) {
-      console.error("Error deleting category:", error);
+      showSnackbar("Kategoriyani oʻchirishda xatolik yuz berdi", "error");
     }
   };
 
@@ -90,11 +118,17 @@ const Page = () => {
           fetchProductCategories({ title: search, pageNumber: 1, pageSize })
         );
         setIsModalOpen(false);
+        showSnackbar(
+          isEditMode
+            ? "Kategoriya muvaffaqiyatli yangilandi"
+            : "Kategoriya muvaffaqiyatli qo'shildi",
+          "success"
+        );
       } else {
-        console.error("Failed to save category:", response.statusText);
+        showSnackbar("Kategoriya saqlanmadi", "error");
       }
     } catch (error) {
-      console.error("Error saving category:", error);
+      showSnackbar("Kategoriyani saqlanishida hato ketdi", "error");
     }
   };
 
@@ -103,7 +137,7 @@ const Page = () => {
   return (
     <div className={styles.wrapper}>
       <div className={styles.row}>
-        <Title>Categoriyalar</Title>
+        <Title>Kategoriyalar</Title>
         <div className={styles.right}>
           <AddBtn onClick={handleCreate} />
           <Search
@@ -121,7 +155,15 @@ const Page = () => {
           />
         </div>
       </div>
-
+      <Snackbar
+        open={snackbarOpen}
+        autoHideDuration={6000}
+        onClose={handleSnackbarClose}
+      >
+        <Alert onClose={handleSnackbarClose} severity={snackbarSeverity}>
+          {snackbarMessage}
+        </Alert>
+      </Snackbar>
       {status === "loading" && <p>Loading...</p>}
       {status === "failed" && <p>Error: {error}</p>}
       {status === "succeeded" && (
@@ -136,7 +178,6 @@ const Page = () => {
             }}
             onUpdate={handleUpdate}
           />
-
           <MyPagination
             currentPage={pagination.currentPage}
             onPageChange={(event, page) => {
@@ -152,13 +193,11 @@ const Page = () => {
             setPageSize={setPageSize}
             totalPages={pagination.totalPages}
           />
-
-          {/* Модальное окно для создания/редактирования */}
           <Modal
             isOpen={isModalOpen}
             onClose={() => setIsModalOpen(false)}
             title={
-              isEditMode ? "Categoriya o'zgartirish" : "Categoriya yaratish"
+              isEditMode ? "Kategoriya o'zgartirish" : "Kategoriya yaratish"
             }
           >
             <form onSubmit={handleFormSubmit}>
@@ -168,7 +207,7 @@ const Page = () => {
                 onChange={(e) =>
                   setFormData({ ...formData, title: e.target.value })
                 }
-                placeholder="Categoriya nomi"
+                placeholder="Kategoriya nomi"
                 required
               />
               <button type="submit">
@@ -176,8 +215,6 @@ const Page = () => {
               </button>
             </form>
           </Modal>
-
-          {/* Модальное окно для подтверждения удаления */}
           <Modal
             isOpen={isConfirmDeleteOpen}
             onClose={() => setIsConfirmDeleteOpen(false)}
