@@ -1,12 +1,13 @@
-import React, { FC } from "react";
+import React, { FC, useState } from "react";
 import styles from "./Table.module.scss";
-import { FaEdit, FaTrash } from "react-icons/fa";
+import { FaEdit, FaTrash, FaEye } from "react-icons/fa";
+import Modal from "../Modal/Modal";
 
 type CustomTableProps = {
   titles: string[];
   keys: string[];
   data: any[];
-  onDelete: (category: any) => void; // Изменено на передачу всей категории
+  onDelete: (category: any) => void;
   onUpdate: (category: any) => void;
 };
 
@@ -17,6 +18,19 @@ const CustomTable: FC<CustomTableProps> = ({
   onDelete,
   onUpdate,
 }) => {
+  const [selectedObject, setSelectedObject] = useState<any>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  const handleView = (row: any) => {
+    setSelectedObject(row);
+    setIsModalOpen(true);
+  };
+
+  const closeModal = () => {
+    setIsModalOpen(false);
+    setSelectedObject(null);
+  };
+
   if (data?.length < 1) {
     return "no data";
   }
@@ -45,14 +59,28 @@ const CustomTable: FC<CustomTableProps> = ({
                   </button>
                   <button onClick={() => onDelete(row)}>
                     <FaTrash />
-                  </button>{" "}
-                  {/* Передаем всю категорию */}
+                  </button>
+                  <button onClick={() => handleView(row)}>
+                    <FaEye />
+                  </button>
                 </div>
               </td>
             </tr>
           ))}
         </tbody>
       </table>
+
+      {isModalOpen && selectedObject && (
+        <Modal isOpen={isModalOpen} onClose={closeModal} title="Object Details">
+          <div className={styles.modalContent}>
+            {keys.map((key, index) => (
+              <p key={index}>
+                <strong>{key}:</strong> {selectedObject[key]}
+              </p>
+            ))}
+          </div>
+        </Modal>
+      )}
     </div>
   );
 };

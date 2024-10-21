@@ -1,5 +1,4 @@
 "use client";
-
 import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import axiosInstance from "@/utils/axiosInstance";
@@ -8,18 +7,19 @@ import Title from "@/components/Title/Title";
 import Modal from "@/components/Modal/Modal";
 import { RootState, AppDispatch } from "@/store/store";
 import { fetchProducts } from "@/features/products/products";
-import Pagination from "@/components/Pagination/Pagination";
 import styles from "./styles.module.scss";
 import Search from "@/components/Search/Search";
 import AddBtn from "@/components/Buttons/AddBtn/AddBtn";
 import MyPagination from "@/components/Pagination/Pagination";
 import { fetchAllCategories } from "@/features/productCategory/allCategories";
+import { Autocomplete, TextField } from "@mui/material";
 
 const Page = () => {
   const dispatch = useDispatch<AppDispatch>();
   const { products, status, error, pagination } = useSelector(
     (state: RootState) => state.products
   );
+
   const {
     categories,
     error: CError,
@@ -30,17 +30,18 @@ const Page = () => {
   const [isEditMode, setIsEditMode] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState<any>(null);
   const [formData, setFormData] = useState({
+    id: "",
     title: "",
     price: "",
     total_measurement: "",
     current_measurement: "",
-    category: "",
+    category: categories?.[0],
   });
   const [isConfirmDeleteOpen, setIsConfirmDeleteOpen] = useState(false);
   const [search, setSearch] = useState("");
-  const [category, setCategory] = useState("");
+  const [category, setCategory] = useState<string>("");
   const [id, setId] = useState("");
-  const [pageSize, setPageSize] = useState(10); // Добавляем состояние для pageSize
+  const [pageSize, setPageSize] = useState(10);
 
   useEffect(() => {
     dispatch(
@@ -56,13 +57,14 @@ const Page = () => {
 
   useEffect(() => {
     dispatch(fetchAllCategories());
-  }, []);
+  }, [dispatch]);
+
   const handleDelete = async () => {
     if (!selectedProduct) return;
 
     try {
       const response = await axiosInstance.delete(
-        `/products/delete/${selectedProduct.id}`
+        `/product/delete/${selectedProduct.id}`
       );
 
       if (response.status < 300) {
@@ -77,22 +79,25 @@ const Page = () => {
         );
         setIsConfirmDeleteOpen(false);
       } else {
-        console.error("Mahsulotni o'chirishda xatolik:", response.statusText);
+        console.error("Error deleting product:", response.statusText);
       }
     } catch (error) {
-      console.error("Mahsulotni o'chirishda xatolik:", error);
+      console.error("Error deleting product:", error);
     }
   };
 
   const handleUpdate = (product: any) => {
     setIsEditMode(true);
+    console.log(product.total_measurement);
+
     setSelectedProduct(product);
     setFormData({
+      id: product.id,
       title: product.title,
       price: product.price,
-      total_measurement: product.total_measurement,
-      current_measurement: product.current_measurement,
-      category: product.category,
+      total_measurement: parseFloat(product.total_measurement) + "",
+      current_measurement: parseFloat(product.current_measurement) + "",
+      category: { id: product.category_id, title: product.category },
     });
     setIsModalOpen(true);
   };
@@ -101,11 +106,12 @@ const Page = () => {
     setIsEditMode(false);
     setSelectedProduct(null);
     setFormData({
+      id: "",
       title: "",
       price: "",
       total_measurement: "",
       current_measurement: "",
-      category: "",
+      category: categories?.[0],
     });
     setIsModalOpen(true);
   };
@@ -114,14 +120,20 @@ const Page = () => {
     e.preventDefault();
 
     const endpoint = isEditMode
-      ? `/products/update/${selectedProduct.id}`
-      : "/products/create";
+      ? `/product/update/${selectedProduct.id}`
+      : "/product/create";
 
     try {
       const response = await axiosInstance({
         method: isEditMode ? "patch" : "post",
         url: endpoint,
-        data: formData,
+        data: {
+          id: formData.id,
+          titles: formData.title,
+          price: formData.price,
+          category_id:formData.category.id,
+          
+        },
       });
 
       if (
@@ -140,10 +152,36 @@ const Page = () => {
         );
         setIsModalOpen(false);
       } else {
-        console.error("Mahsulotni saqlashda xatolik:", response.statusText);
+        console.error("Error saving product:", response.statusText);
       }
     } catch (error) {
-      console.error("Mahsulotni saqlashda xatolik:", error);
+      console.error("Error saving product:", error);
+    }
+  };
+
+  const onChangeCategorySelect = (event: any, value: any) => {
+    if (value) {
+      setCategory(value.id);
+      dispatch(
+        fetchProducts({
+          pageNumber: 1,
+          pageSize: 10,
+          searchTitle: search,
+          searchable_title_id: id,
+          category_id: value.id,
+        })
+      );
+    } else {
+      setCategory("");
+      dispatch(
+        fetchProducts({
+          pageNumber: 1,
+          pageSize: 10,
+          searchTitle: search,
+          searchable_title_id: id,
+          category_id: "",
+        })
+      );
     }
   };
 
@@ -157,26 +195,39 @@ const Page = () => {
 
   return (
     <div className={styles.wrapper}>
-      <div className={styles.row}>
-        <Title>Mahsulotlar</Title>
-        <div className={styles.right}>
-          <AddBtn onClick={handleCreate} />
-          <Search
-            onChange={(e) => setSearch(e.target.value)}
-            onClick={() => {
-              dispatch(
-                fetchProducts({
-                  pageNumber: 1,
-                  pageSize: 10,
-                  searchTitle: search,
-                  searchable_title_id: id,
-                  category_id: category,
-                })
-              );
-            }}
-            search={search}
-          />
+      <div className={styles.header}>
+        <div className={styles.row}>
+          <Title>Mahsulotlar</Title>
+          <div className={styles.right}>
+            <AddBtn onClick={handleCreate} />
+            <Search
+              onChange={(e) => setSearch(e.target.value)}
+              onClick={() => {
+                dispatch(
+                  fetchProducts({
+                    pageNumber: 1,
+                    pageSize: 10,
+                    searchTitle: search,
+                    searchable_title_id: id,
+                    category_id: category,
+                  })
+                );
+              }}
+              search={search}
+            />
+          </div>
         </div>
+        <Autocomplete
+          className={styles.autocomplete}
+          id="free-solo-demo"
+          size="small"
+          options={categories}
+          onChange={onChangeCategorySelect}
+          getOptionLabel={(option) => option.title}
+          renderInput={(params) => (
+            <TextField key={params.id} {...params} label="Categoriya" />
+          )}
+        />
       </div>
 
       {status === "loading" && <p>Yuklanmoqda...</p>}
@@ -193,11 +244,20 @@ const Page = () => {
             ]}
             titles={titles}
             data={products.map((product: any) => ({
+              id: product.id,
               title: product.title,
               price: product.price,
-              total_measurement: product.total_measurement,
-              current_measurement: product.current_measurement,
+              type: product.type,
+              total_measurement:
+                product.type == "metr"
+                  ? product.total_measurement + " metr"
+                  : product.total_quantity + " dona",
+              current_measurement:
+                product.type == "metr"
+                  ? product.current_measurement + " metr"
+                  : product.current_quantity + " dona",
               category: product.category_id.title,
+              category_id: product.category_id.id,
             }))}
             onDelete={(product) => {
               setSelectedProduct(product);
@@ -228,26 +288,37 @@ const Page = () => {
             title={isEditMode ? "Mahsulotni tahrirlash" : "Mahsulot yaratish"}
           >
             <form onSubmit={handleFormSubmit}>
-              <input
-                type="text"
+              <TextField
+                label="Mahsulot nomi"
+                className={styles.input}
+                size="small"
+                variant="outlined"
+                fullWidth
                 value={formData.title}
                 onChange={(e) =>
                   setFormData({ ...formData, title: e.target.value })
                 }
-                placeholder="Mahsulot nomi"
                 required
               />
-              <input
-                type="text"
+              <TextField
+                label="Narxi"
+                className={styles.input}
+                size="small"
+                variant="outlined"
+                fullWidth
                 value={formData.price}
                 onChange={(e) =>
                   setFormData({ ...formData, price: e.target.value })
                 }
-                placeholder="Narxi"
                 required
+                type="number"
               />
-              <input
-                type="text"
+              <TextField
+                label="Umumiy o'lchov"
+                className={styles.input}
+                size="small"
+                variant="outlined"
+                fullWidth
                 value={formData.total_measurement}
                 onChange={(e) =>
                   setFormData({
@@ -255,11 +326,15 @@ const Page = () => {
                     total_measurement: e.target.value,
                   })
                 }
-                placeholder="Umumiy o'lchov"
                 required
+                type="number"
               />
-              <input
-                type="text"
+              <TextField
+                label="Hozirgi o'lchov"
+                className={styles.input}
+                size="small"
+                variant="outlined"
+                fullWidth
                 value={formData.current_measurement}
                 onChange={(e) =>
                   setFormData({
@@ -267,21 +342,27 @@ const Page = () => {
                     current_measurement: e.target.value,
                   })
                 }
-                placeholder="Hozirgi o'lchov"
                 required
+                type="number"
               />
-              <input
-                type="text"
-                value={formData.category}
-                onChange={(e) =>
+              <Autocomplete
+                className={styles.autocompleteModal}
+                id="category-select"
+                size="small"
+                options={categories}
+                defaultValue={formData.category}
+                onChange={(event, value) => {
                   setFormData({
                     ...formData,
-                    category: e.target.value,
-                  })
-                }
-                placeholder="Kategoriya ID"
-                required
+                    category: value || categories?.[0],
+                  });
+                }}
+                getOptionLabel={(option) => option.title}
+                renderInput={(params) => (
+                  <TextField {...params} label="Kategoriya" />
+                )}
               />
+
               <button type="submit">
                 {isEditMode ? "Yangilash" : "Yaratish"}
               </button>
@@ -291,10 +372,10 @@ const Page = () => {
           <Modal
             isOpen={isConfirmDeleteOpen}
             onClose={() => setIsConfirmDeleteOpen(false)}
-            title="O'chirishni tasdiqlash"
+            title="Mahsulotni o'chirish"
           >
-            <p>Ushbu mahsulotni o'chirishni xohlaysizmi?</p>
-            <button onClick={handleDelete}>Ha, O'chirish</button>
+            <p>Haqiqatan ham ushbu mahsulotni o'chirishni istaysizmi?</p>
+            <button onClick={handleDelete}>O'chirish</button>
             <button onClick={() => setIsConfirmDeleteOpen(false)}>
               Bekor qilish
             </button>

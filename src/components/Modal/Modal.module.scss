@@ -10,7 +10,7 @@
   align-items: center;
   z-index: 1000;
 
-  input {
+  form > input {
     width: 100%;
     padding: 10px;
     border: 1px solid #1e293b;
@@ -28,7 +28,9 @@
     }
   }
 
-  button {
+  & > button,
+  & > * > button,
+  form > button {
     background-color: #1e293b;
     color: #ffffff;
     border: none;

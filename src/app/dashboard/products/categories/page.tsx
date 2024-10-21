@@ -1,5 +1,4 @@
 "use client";
-
 import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import axiosInstance from "@/utils/axiosInstance";
@@ -8,13 +7,6 @@ import Title from "@/components/Title/Title";
 import Modal from "@/components/Modal/Modal";
 import { RootState, AppDispatch } from "@/store/store";
 import { fetchProductCategories } from "@/features/productCategory/productCategorySlice";
-import {
-  Pagination,
-  Select,
-  MenuItem,
-  FormControl,
-  InputLabel,
-} from "@mui/material";
 import styles from "./styles.module.scss";
 import Search from "@/components/Search/Search";
 import AddBtn from "@/components/Buttons/AddBtn/AddBtn";
