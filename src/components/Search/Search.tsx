@@ -1,19 +1,21 @@
 import React from "react";
 import { FaSearch } from "react-icons/fa";
-import styles from "./Search.module.scss"; 
+import styles from "./Search.module.scss";
 
 const Search = ({
   onClick,
   onChange,
   search,
+  placeholder,
 }: {
   onChange: React.ChangeEventHandler<HTMLInputElement> | undefined;
   onClick: React.MouseEventHandler<HTMLButtonElement> | undefined;
   search: string;
+  placeholder?: string;
 }) => {
   const handleKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
     if (event.key === "Enter") {
-      onClick?.(event as any); 
+      onClick?.(event as any);
     }
   };
   return (
@@ -21,7 +23,7 @@ const Search = ({
       <input
         type="text"
         value={search}
-        placeholder="Qidirish"
+        placeholder={placeholder || "Qidirish"}
         onChange={onChange}
         onKeyDown={handleKeyDown}
       />

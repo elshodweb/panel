@@ -71,11 +71,15 @@ const CustomTable: FC<CustomTableProps> = ({
       </table>
 
       {isModalOpen && selectedObject && (
-        <Modal isOpen={isModalOpen} onClose={closeModal} title="Object Details">
+        <Modal
+          isOpen={isModalOpen}
+          onClose={closeModal}
+          title="Ko'proq malumot"
+        >
           <div className={styles.modalContent}>
             {keys.map((key, index) => (
               <p key={index}>
-                <strong>{key}:</strong> {selectedObject[key]}
+                <strong>{titles[index]}:</strong> {selectedObject[key]}
               </p>
             ))}
           </div>

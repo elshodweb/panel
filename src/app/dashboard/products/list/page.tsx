@@ -33,14 +33,16 @@ const Page = () => {
     id: "",
     title: "",
     price: "",
+    type: "dona",
     total_measurement: "",
     current_measurement: "",
+    searchable_title_id: "",
     category: categories?.[0],
   });
   const [isConfirmDeleteOpen, setIsConfirmDeleteOpen] = useState(false);
   const [search, setSearch] = useState("");
-  const [category, setCategory] = useState<string>("");
   const [id, setId] = useState("");
+  const [category, setCategory] = useState<string>("");
   const [pageSize, setPageSize] = useState(10);
 
   useEffect(() => {
@@ -95,6 +97,8 @@ const Page = () => {
       id: product.id,
       title: product.title,
       price: product.price,
+      type: product.type,
+      searchable_title_id: product.searchable_title_id,
       total_measurement: parseFloat(product.total_measurement) + "",
       current_measurement: parseFloat(product.current_measurement) + "",
       category: { id: product.category_id, title: product.category },
@@ -108,7 +112,9 @@ const Page = () => {
     setFormData({
       id: "",
       title: "",
+      searchable_title_id: "",
       price: "",
+      type: "dona",
       total_measurement: "",
       current_measurement: "",
       category: categories?.[0],
@@ -129,10 +135,19 @@ const Page = () => {
         url: endpoint,
         data: {
           id: formData.id,
-          titles: formData.title,
+          category_id: formData.category.id,
+          title: formData.title,
+          type: formData.type,
           price: formData.price,
-          category_id:formData.category.id,
-          
+          searchable_title_id: formData.searchable_title_id,
+          current_measurement:
+            formData.type === "metr" ? formData.current_measurement : "0",
+          total_measurement:
+            formData.type === "metr" ? formData.total_measurement : "0",
+          current_quantity:
+            formData.type === "dona" ? formData.current_measurement : "0",
+          total_quantity:
+            formData.type === "dona" ? formData.total_measurement : "0",
         },
       });
 
@@ -186,8 +201,10 @@ const Page = () => {
   };
 
   const titles = [
+    "ID",
     "Nomi",
     "Narxi",
+    "O'lchovi",
     "Umumiy o'lchov",
     "Hozirgi o'lchov",
     "Kategoriya",
@@ -201,7 +218,16 @@ const Page = () => {
           <div className={styles.right}>
             <AddBtn onClick={handleCreate} />
             <Search
-              onChange={(e) => setSearch(e.target.value)}
+              onChange={(e) => {
+                if (!isNaN(parseInt(e.target.value))) {
+                  setId(parseInt(e.target.value) + "");
+                  setSearch("");
+                } else {
+                  setSearch(e.target.value);
+                  setId("");
+                }
+              }}
+              placeholder="Qidirish (Nomi, Id)"
               onClick={() => {
                 dispatch(
                   fetchProducts({
@@ -213,7 +239,7 @@ const Page = () => {
                   })
                 );
               }}
-              search={search}
+              search={search === "" ? id : search}
             />
           </div>
         </div>
@@ -236,8 +262,10 @@ const Page = () => {
         <>
           <CustomTable
             keys={[
+              "searchable_title_id",
               "title",
               "price",
+              "type",
               "total_measurement",
               "current_measurement",
               "category",
@@ -245,6 +273,7 @@ const Page = () => {
             titles={titles}
             data={products.map((product: any) => ({
               id: product.id,
+              searchable_title_id: product.searchable_title_id,
               title: product.title,
               price: product.price,
               type: product.type,
@@ -299,6 +328,22 @@ const Page = () => {
                   setFormData({ ...formData, title: e.target.value })
                 }
                 required
+              />
+              <TextField
+                label="ID"
+                className={styles.input}
+                size="small"
+                variant="outlined"
+                fullWidth
+                value={formData.searchable_title_id}
+                onChange={(e) =>
+                  setFormData({
+                    ...formData,
+                    searchable_title_id: e.target.value,
+                  })
+                }
+                required
+                type="number"
               />
               <TextField
                 label="Narxi"
@@ -362,7 +407,22 @@ const Page = () => {
                   <TextField {...params} label="Kategoriya" />
                 )}
               />
-
+              <Autocomplete
+                className={styles.autocompleteModal}
+                id="category-select"
+                size="small"
+                options={["dona", "metr"]}
+                defaultValue={formData.type}
+                onChange={(event, value) => {
+                  setFormData({
+                    ...formData,
+                    type: value || "dona",
+                  });
+                }}
+                renderInput={(params) => (
+                  <TextField {...params} label="O'lchov birligi" />
+                )}
+              />
               <button type="submit">
                 {isEditMode ? "Yangilash" : "Yaratish"}
               </button>
