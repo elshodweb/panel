@@ -49,13 +49,13 @@ const Page = () => {
     dispatch(
       fetchProducts({
         pageNumber: 1,
-        pageSize: 10,
+        pageSize: pageSize,
         searchTitle: search,
         searchable_title_id: id,
         category_id: category,
       })
     );
-  }, [dispatch]);
+  }, [dispatch, pageSize]);
 
   useEffect(() => {
     dispatch(fetchAllCategories());
@@ -73,7 +73,7 @@ const Page = () => {
         dispatch(
           fetchProducts({
             pageNumber: 1,
-            pageSize: 10,
+            pageSize: pageSize,
             searchTitle: search,
             searchable_title_id: id,
             category_id: category,
@@ -159,7 +159,7 @@ const Page = () => {
         dispatch(
           fetchProducts({
             pageNumber: 1,
-            pageSize: 10,
+            pageSize: pageSize,
             searchTitle: search,
             searchable_title_id: id,
             category_id: category,
@@ -180,7 +180,7 @@ const Page = () => {
       dispatch(
         fetchProducts({
           pageNumber: 1,
-          pageSize: 10,
+          pageSize: pageSize,
           searchTitle: search,
           searchable_title_id: id,
           category_id: value.id,
@@ -191,7 +191,7 @@ const Page = () => {
       dispatch(
         fetchProducts({
           pageNumber: 1,
-          pageSize: 10,
+          pageSize: pageSize,
           searchTitle: search,
           searchable_title_id: id,
           category_id: "",
@@ -219,8 +219,8 @@ const Page = () => {
             <AddBtn onClick={handleCreate} />
             <Search
               onChange={(e) => {
-                if (!isNaN(parseInt(e.target.value))) {
-                  setId(parseInt(e.target.value) + "");
+                if (!isNaN(parseFloat(e.target.value))) {
+                  setId(parseFloat(e.target.value) + "");
                   setSearch("");
                 } else {
                   setSearch(e.target.value);
@@ -232,7 +232,7 @@ const Page = () => {
                 dispatch(
                   fetchProducts({
                     pageNumber: 1,
-                    pageSize: 10,
+                    pageSize: pageSize,
                     searchTitle: search,
                     searchable_title_id: id,
                     category_id: category,
@@ -250,8 +250,13 @@ const Page = () => {
           options={categories}
           onChange={onChangeCategorySelect}
           getOptionLabel={(option) => option.title}
+          isOptionEqualToValue={(option, value) => option.id === value.id}
           renderInput={(params) => (
-            <TextField key={params.id} {...params} label="Categoriya" />
+            <TextField
+              {...params}
+              key={params.inputProps.id}
+              label="Categoriya"
+            />
           )}
         />
       </div>
@@ -299,8 +304,8 @@ const Page = () => {
             onPageChange={(event, page) => {
               dispatch(
                 fetchProducts({
-                  pageNumber: pagination.currentPage,
-                  pageSize: 10,
+                  pageNumber: page,
+                  pageSize: pageSize,
                   searchTitle: search,
                   searchable_title_id: id,
                   category_id: category,
