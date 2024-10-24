@@ -26,7 +26,7 @@ const LoginPage = () => {
       setError("");
 
       console.log("Token saqlandi: ", token);
-      
+
       // Перенаправление на другую страницу
       router.push("/dashboard/products/categories");
     } catch (err) {
@@ -42,6 +42,7 @@ const LoginPage = () => {
       alignItems="center"
       minHeight="100vh"
       bgcolor="#f0f2f5"
+      padding={"10px"}
     >
       <Paper elevation={3} style={{ padding: "2rem", width: "400px" }}>
         <Box display="flex" justifyContent="center" alignItems="center" mb={2}>
