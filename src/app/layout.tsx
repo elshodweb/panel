@@ -7,8 +7,8 @@ import AuthRedirect from "@/components/AuthRedirect/AuthRedirect"; // Импор
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata = {
-  title: "Your Page Title",
-  description: "Description of your page",
+  title: "Admin panel",
+  description: "Ombor hona uchun admin panel",
 };
 
 export default function RootLayout({
