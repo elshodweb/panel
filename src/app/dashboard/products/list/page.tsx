@@ -14,6 +14,7 @@ import MyPagination from "@/components/Pagination/Pagination";
 import { fetchAllCategories } from "@/features/productCategory/allCategories";
 import { Autocomplete, Snackbar, TextField } from "@mui/material";
 import MuiAlert from "@mui/material/Alert";
+import Loader from "@/components/Loader/Loader";
 const Alert = forwardRef<HTMLDivElement, React.ComponentProps<typeof MuiAlert>>(
   function Alert(props, ref) {
     return <MuiAlert elevation={6} ref={ref} variant="filled" {...props} />;
@@ -115,7 +116,6 @@ const Page = () => {
 
   const handleUpdate = (product: any) => {
     setIsEditMode(true);
-    console.log(product.total_measurement);
 
     setSelectedProduct(product);
     setFormData({
@@ -235,7 +235,7 @@ const Page = () => {
     "ID",
     "Nomi",
     "Narxi",
-    "O'lchovi",
+    "O'lchovi birligi",
     "Umumiy o'lchov",
     "Hozirgi o'lchov",
     "Kategoriya",
@@ -292,7 +292,7 @@ const Page = () => {
         />
       </div>
 
-      {status === "loading" && <p>Yuklanmoqda...</p>}
+      {status === "loading" && <Loader />}
       {status === "failed" && <p>Xatolik: {error}</p>}
       {status === "succeeded" && (
         <>

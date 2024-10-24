@@ -13,6 +13,7 @@ import AddBtn from "@/components/Buttons/AddBtn/AddBtn";
 import MyPagination from "@/components/Pagination/Pagination";
 import Snackbar from "@mui/material/Snackbar";
 import MuiAlert from "@mui/material/Alert";
+import Loader from "@/components/Loader/Loader";
 
 const Alert = forwardRef<HTMLDivElement, React.ComponentProps<typeof MuiAlert>>(
   function Alert(props, ref) {
@@ -164,7 +165,7 @@ const Page = () => {
           {snackbarMessage}
         </Alert>
       </Snackbar>
-      {status === "loading" && <p>Loading...</p>}
+      {status === "loading" && <Loader />}
       {status === "failed" && <p>Error: {error}</p>}
       {status === "succeeded" && (
         <>
