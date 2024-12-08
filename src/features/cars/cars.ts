@@ -1,16 +1,32 @@
-import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
+import { createSlice, createAsyncThunk, PayloadAction } from "@reduxjs/toolkit";
 import axiosInstance from "@/utils/axiosInstance";
 
+interface CarService {
+  id: string;
+  name: string;
+  type: string;
+  profit: number;
+  expense: number;
+  // Добавьте другие поля, возвращаемые API
+}
+
+interface Pagination {
+  currentPage: number;
+  totalPages: number;
+  pageSize: number;
+  totalItems: number;
+}
+
+interface ApiResponse {
+  results: CarService[];
+  pagination: Pagination;
+}
+
 interface CarServiceState {
-  carServices: any[];
+  carServices: CarService[];
   status: "idle" | "loading" | "succeeded" | "failed";
   error: string | null;
-  pagination: {
-    currentPage: number;
-    totalPages: number;
-    pageSize: number;
-    totalItems: number;
-  };
+  pagination: Pagination;
 }
 
 const initialState: CarServiceState = {
@@ -25,20 +41,18 @@ const initialState: CarServiceState = {
   },
 };
 
-// Async thunk for fetching car service data
-export const fetchCarServices = createAsyncThunk(
+export const fetchCarServices = createAsyncThunk<
+  ApiResponse,
+  { pageNumber: number; pageSize: number; profit_or_expense: string | null }
+>(
   "carServices/fetchCarServices",
-  async (params: {
-    pageNumber: number;
-    pageSize: number;
-    profit_or_expense: string | null;
-  }) => {
+  async (params) => {
     const { pageNumber, pageSize, profit_or_expense } = params;
-    const response = await axiosInstance.get(`/car-service/all`, {
+    const response = await axiosInstance.get<ApiResponse>(`/car-service/all`, {
       params: {
         pageNumber,
         pageSize,
-        profit_or_expense: profit_or_expense ? profit_or_expense : "null",
+        profit_or_expense: profit_or_expense || "null",
       },
     });
     return response.data;
@@ -55,15 +69,10 @@ const carServiceSlice = createSlice({
         state.status = "loading";
         state.error = null;
       })
-      .addCase(fetchCarServices.fulfilled, (state, action) => {
+      .addCase(fetchCarServices.fulfilled, (state, action: PayloadAction<ApiResponse>) => {
         state.status = "succeeded";
         state.carServices = action.payload.results;
-        state.pagination = {
-          currentPage: Number(action.payload.pagination.currentPage),
-          totalPages: Number(action.payload.pagination.totalPages),
-          pageSize: Number(action.payload.pagination.pageSize),
-          totalItems: Number(action.payload.pagination.totalItems),
-        };
+        state.pagination = action.payload.pagination;
       })
       .addCase(fetchCarServices.rejected, (state, action) => {
         state.status = "failed";

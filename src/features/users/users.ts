@@ -1,16 +1,32 @@
-import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
+import { createSlice, createAsyncThunk, PayloadAction } from "@reduxjs/toolkit";
 import axiosInstance from "@/utils/axiosInstance";
 
+interface User {
+  id: string;
+  name: string;
+  email: string;
+  phone: string;
+  role: string;
+  // Добавьте другие поля, которые возвращает ваш API
+}
+
+interface Pagination {
+  currentPage: number;
+  totalPages: number;
+  pageSize: number;
+  totalItems: number;
+}
+
+interface ApiResponse {
+  results: User[];
+  pagination: Pagination;
+}
+
 interface UserState {
-  users: any[];
+  users: User[];
   status: "idle" | "loading" | "succeeded" | "failed";
   error: string | null;
-  pagination: {
-    currentPage: number;
-    totalPages: number;
-    pageSize: number;
-    totalItems: number;
-  };
+  pagination: Pagination;
 }
 
 const initialState: UserState = {
@@ -25,21 +41,19 @@ const initialState: UserState = {
   },
 };
 
-export const fetchUsers = createAsyncThunk(
+export const fetchUsers = createAsyncThunk<
+  ApiResponse,
+  { pageNumber: number; pageSize: number; phone: string | null; role: string }
+>(
   "users/fetchUsers",
-  async (params: {
-    pageNumber: number;
-    pageSize: number;
-    phone: string | null;
-    role: string;
-  }) => {
+  async (params) => {
     const { pageNumber, pageSize, phone, role } = params;
-    const response = await axiosInstance.get(`/Auth/getUser/all`, {
+    const response = await axiosInstance.get<ApiResponse>(`/Auth/getUser/all`, {
       params: {
         pageNumber,
         pageSize,
-        phone: phone ? phone : "null",
-        role: role ? role : "null",
+        phone: phone || "null",
+        role: role || "null",
       },
     });
     return response.data;
@@ -56,15 +70,10 @@ const userSlice = createSlice({
         state.status = "loading";
         state.error = null;
       })
-      .addCase(fetchUsers.fulfilled, (state, action) => {
+      .addCase(fetchUsers.fulfilled, (state, action: PayloadAction<ApiResponse>) => {
         state.status = "succeeded";
         state.users = action.payload.results;
-        state.pagination = {
-          currentPage: Number(action.payload.pagination.currentPage),
-          totalPages: Number(action.payload.pagination.totalPages),
-          pageSize: Number(action.payload.pagination.pageSize),
-          totalItems: Number(action.payload.pagination.totalItems),
-        };
+        state.pagination = action.payload.pagination;
       })
       .addCase(fetchUsers.rejected, (state, action) => {
         state.status = "failed";

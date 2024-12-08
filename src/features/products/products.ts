@@ -1,16 +1,30 @@
-import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
+import { createSlice, createAsyncThunk, PayloadAction } from "@reduxjs/toolkit";
 import axiosInstance from "@/utils/axiosInstance";
 
+interface Product {
+  id: string;
+  name: string;
+  price: number;
+  // Добавьте другие поля, которые возвращает ваш API
+}
+
+interface Pagination {
+  currentPage: number;
+  totalPages: number;
+  pageSize: number;
+  totalItems: number;
+}
+
+interface ApiResponse {
+  results: Product[];
+  pagination: Pagination;
+}
+
 interface ProductState {
-  products: any[];
+  products: Product[];
   status: "idle" | "loading" | "succeeded" | "failed";
   error: string | null;
-  pagination: {
-    currentPage: number;
-    totalPages: number;
-    pageSize: number;
-    totalItems: number;
-  };
+  pagination: Pagination;
 }
 
 const initialState: ProductState = {
@@ -25,23 +39,20 @@ const initialState: ProductState = {
   },
 };
 
-export const fetchProducts = createAsyncThunk(
-  "products/fetchProducts",
-  async (params: {
+export const fetchProducts = createAsyncThunk<
+  ApiResponse,
+  {
     pageNumber: number;
     pageSize: number;
     searchTitle: string;
     searchable_title_id: string;
     category_id: string;
-  }) => {
-    const {
-      pageNumber,
-      pageSize,
-      searchTitle,
-      searchable_title_id,
-      category_id,
-    } = params;
-    const response = await axiosInstance.get(`/product/all`, {
+  }
+>(
+  "products/fetchProducts",
+  async (params) => {
+    const { pageNumber, pageSize, searchTitle, searchable_title_id, category_id } = params;
+    const response = await axiosInstance.get<ApiResponse>(`/product/all`, {
       params: {
         pageNumber,
         pageSize,
@@ -64,15 +75,10 @@ const productSlice = createSlice({
         state.status = "loading";
         state.error = null;
       })
-      .addCase(fetchProducts.fulfilled, (state, action) => {
+      .addCase(fetchProducts.fulfilled, (state, action: PayloadAction<ApiResponse>) => {
         state.status = "succeeded";
         state.products = action.payload.results;
-        state.pagination = {
-          currentPage: Number(action.payload.pagination.currentPage),
-          totalPages: Number(action.payload.pagination.totalPages),
-          pageSize: Number(action.payload.pagination.pageSize),
-          totalItems: Number(action.payload.pagination.totalItems),
-        };
+        state.pagination = action.payload.pagination;
       })
       .addCase(fetchProducts.rejected, (state, action) => {
         state.status = "failed";
