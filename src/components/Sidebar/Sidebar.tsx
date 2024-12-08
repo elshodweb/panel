@@ -13,9 +13,12 @@ import {
   FaClipboardList,
   FaTags,
   FaCheck,
+  FaSignOutAlt,
 } from "react-icons/fa";
 import { MdCancelPresentation } from "react-icons/md";
 import styles from "./Sidebar.module.scss";
+import { useRouter } from "next/navigation";
+import Modal from "../Modal/Modal";
 
 type MenuItem = {
   id: number;
@@ -36,6 +39,8 @@ const Sidebar: FC<SidebarProps> = ({ selected, setSelected }) => {
   const [openSections, setOpenSections] = useState<{ [key: string]: boolean }>(
     {}
   );
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
 
   const toggleSection = (key: string) => {
     setOpenSections((prev) => ({
@@ -112,6 +117,15 @@ const Sidebar: FC<SidebarProps> = ({ selected, setSelected }) => {
     },
   ];
 
+  const router = useRouter();
+  const handleLogout = () => {
+    // Логика для выхода (например, очистка токена, редирект)
+    console.log("Logging out...");
+    localStorage.removeItem("token");
+    // Допустим, редирект на страницу входа:
+    window.location.href = "/login";
+  };
+
   return (
     <div
       className={`${styles.sidebar} ${isOpen ? styles.open : styles.closed}`}
@@ -125,25 +139,22 @@ const Sidebar: FC<SidebarProps> = ({ selected, setSelected }) => {
             {/* Если у элемента есть дочерние пункты, не делаем его ссылкой */}
             {item.children ? (
               <div
-                className={`${styles.menuItem} ${
-                  selected === item.key ? styles.active : ""
-                }`}
+                className={`${styles.menuItem} ${selected === item.key ? styles.active : ""
+                  }`}
                 onClick={() => toggleSection(item.key)}
               >
                 <div className={styles.icon}>{item.icon}</div>
                 {isOpen && <span>{item.name}</span>}
                 <FaChevronRight
-                  className={`${styles.arrow} ${
-                    openSections[item.key] ? styles.open : ""
-                  }`}
+                  className={`${styles.arrow} ${openSections[item.key] ? styles.open : ""
+                    }`}
                 />
               </div>
             ) : (
               <Link href={item.href || "#"} passHref>
                 <div
-                  className={`${styles.menuItem} ${
-                    selected === item.key ? styles.active : ""
-                  }`}
+                  className={`${styles.menuItem} ${selected === item.key ? styles.active : ""
+                    }`}
                   onClick={() => {
                     setSelected(item.key);
                     setIsOpen(false);
@@ -158,16 +169,14 @@ const Sidebar: FC<SidebarProps> = ({ selected, setSelected }) => {
             {/* Отображаем дочерние пункты, если они есть */}
             {item.children && (
               <div
-                className={`${styles.subMenu} ${
-                  openSections[item.key] ? styles.open : styles.closed
-                }`}
+                className={`${styles.subMenu} ${openSections[item.key] ? styles.open : styles.closed
+                  }`}
               >
                 {item.children.map((subItem) => (
                   <Link href={subItem.href || "#"} passHref key={subItem.id}>
                     <div
-                      className={`${styles.subMenuItem} ${
-                        selected === subItem.key ? styles.active : ""
-                      }`}
+                      className={`${styles.subMenuItem} ${selected === subItem.key ? styles.active : ""
+                        }`}
                       onClick={() => {
                         setSelected(subItem.key);
                         setIsOpen(false);
@@ -185,6 +194,32 @@ const Sidebar: FC<SidebarProps> = ({ selected, setSelected }) => {
           </div>
         ))}
       </div>
+      <div
+        className={styles.logoutButton}
+        onClick={() => setIsModalOpen(true)}
+      >
+        <div className={styles.icon}>
+          <FaSignOutAlt />
+        </div>
+        {isOpen && <span>Logout</span>}
+      </div>
+      <Modal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        title="Tizimdan chiqishni tasdiqlash"
+      >
+        <p className={styles.text}>Haqiqatan ham tizimdan chiqishni xohlaysizmi?</p>
+        <div className={styles.modalFooter}>
+          <button onClick={handleLogout} className={styles.confirmButton}>
+            Ha, Chiqish
+          </button>
+          <button onClick={() => setIsModalOpen(false)} className={styles.cancelButton}>
+            Bekor qilish
+          </button>
+        </div>
+      </Modal>
+
+
     </div>
   );
 };
