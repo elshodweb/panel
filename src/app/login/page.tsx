@@ -15,7 +15,7 @@ const LoginPage = () => {
     e.preventDefault();
 
     try {
-      const response = await axiosInstance.post("/Auth/user/signIn", {
+      const response: any = await axiosInstance.post("/Auth/user/signIn", {
         phone,
         password,
       });

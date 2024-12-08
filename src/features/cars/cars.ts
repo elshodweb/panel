@@ -1,13 +1,28 @@
 import { createSlice, createAsyncThunk, PayloadAction } from "@reduxjs/toolkit";
 import axiosInstance from "@/utils/axiosInstance";
 
+interface User {
+  id: string;
+  first_name: string;
+  name: string;
+  last_name: string;
+  password: string;
+  role: string;
+  phone: string;
+  img: string | null;
+  comment: string;
+  update_date: string;
+  create_data: string;
+}
+
 interface CarService {
   id: string;
-  name: string;
-  type: string;
-  profit: number;
-  expense: number;
-  // Добавьте другие поля, возвращаемые API
+  profit_or_expense: "profit" | "expense"; // Учитывая, что это может быть только "profit" или "expense"
+  price: string; // Похоже, что это строка в ответе
+  comment: string;
+  create_data: string; // Дата создания в строковом формате
+  user_id: User; // Вложенный объект для пользователя
+  order_id: string | null; // Значение может быть null
 }
 
 interface Pagination {

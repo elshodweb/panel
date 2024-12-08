@@ -1,12 +1,30 @@
 import { createSlice, createAsyncThunk, PayloadAction } from "@reduxjs/toolkit";
 import axios from "axios";
 
+interface User {
+  id: string;
+  first_name: string;
+  name: string;
+  last_name: string;
+  password: string;
+  role: string;
+  phone: string;
+  img: string | null;
+  comment: string;
+  update_date: string;
+  create_data: string;
+}
+
 interface Debt {
   id: string;
-  amount: number;
-  dueDate: string;
-  description: string;
-  // Добавьте другие поля, соответствующие структуре данных API
+  remaining_debt: string; // Строка, так как в API это строка
+  isActive: string; // В API это строка ("Faol" или "true")
+  comment: string;
+  dayToBeGiven: string; // Дата в строковом формате
+  dayGiven: string; // Дата в строковом формате
+  update_date: string; // Дата последнего обновления
+  create_data: string; // Дата создания
+  user_id: User; // Вложенный объект для пользователя
 }
 
 interface Pagination {

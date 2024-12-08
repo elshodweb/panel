@@ -3,11 +3,16 @@ import axiosInstance from "@/utils/axiosInstance";
 
 interface User {
   id: string;
+  first_name: string;
   name: string;
-  email: string;
-  phone: string;
+  last_name: string;
+  password: string;
   role: string;
-  // Добавьте другие поля, которые возвращает ваш API
+  phone: string;
+  img: string | null; // This can be null or a string if there's an image
+  comment: string;
+  update_date: string; // ISO 8601 string for date
+  create_data: string; // ISO 8601 string for date
 }
 
 interface Pagination {
