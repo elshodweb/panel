@@ -14,7 +14,7 @@ const AuthRedirect: React.FC = () => {
     if (!token) {
       router.push("/login");
     } else {
-      router.push("/dashboard/products/categories");
+      router.push("/dashboard/sotuv/harid-qilish");
     }
     setLoading(false); // Устанавливаем загрузку в false после проверки
   }, [router]);

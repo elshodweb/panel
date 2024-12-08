@@ -15,28 +15,3 @@
   padding: 15px;
   gap: 10px;
 }
-
-.select {
-  max-width: 300px;
-}
-.right {
-  display: flex;
-  gap: 5px;
-  justify-content: flex-end;
-  width: 100%;
-}
-
-@media (max-width: 530px) {
-  .row {
-    flex-wrap: wrap;
-    padding: 5px;
-  }
-
-  .right {
-    justify-content: flex-start;
-  }
-
-  .wrapper {
-    padding-top: 100px;
-  }
-}

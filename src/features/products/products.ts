@@ -1,11 +1,12 @@
 import { createSlice, createAsyncThunk, PayloadAction } from "@reduxjs/toolkit";
 import axiosInstance from "@/utils/axiosInstance";
+import { ProductCategory } from "../productCategory/productCategorySlice";
 
 interface Product {
   id: string;
-  name: string;
+  title: string;
   price: number;
-  // Добавьте другие поля, которые возвращает ваш API
+  category_id: ProductCategory;
 }
 
 interface Pagination {

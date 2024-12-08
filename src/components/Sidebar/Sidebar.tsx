@@ -1,5 +1,5 @@
 "use client";
-import React, { FC, useState } from "react";
+import React, { FC, useEffect, useRef, useState } from "react";
 import Link from "next/link"; // Import Link from Next.js
 import {
   FaBox,
@@ -48,6 +48,22 @@ const Sidebar: FC<SidebarProps> = ({ selected, setSelected }) => {
       [key]: !prev[key],
     }));
   };
+  const sidebarRef = useRef<HTMLDivElement>(null);
+  const handleOutsideClick = (event: MouseEvent) => {
+    if (
+      sidebarRef.current &&
+      !sidebarRef.current.contains(event.target as Node) &&
+      isOpen
+    ) {
+      setIsOpen(false); // Закрываем sidebar, если клик произошёл за его пределами
+    }
+  };
+  useEffect(() => {
+    document.addEventListener("click", handleOutsideClick);
+    return () => {
+      document.removeEventListener("click", handleOutsideClick);
+    };
+  }, [isOpen]);
 
   const menuItems: MenuItem[] = [
     {
@@ -128,6 +144,7 @@ const Sidebar: FC<SidebarProps> = ({ selected, setSelected }) => {
 
   return (
     <div
+      ref={sidebarRef}
       className={`${styles.sidebar} ${isOpen ? styles.open : styles.closed}`}
     >
       <button className={styles.toggleBtn} onClick={() => setIsOpen(!isOpen)}>

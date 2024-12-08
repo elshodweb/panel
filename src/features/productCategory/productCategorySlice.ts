@@ -1,7 +1,7 @@
 import axiosInstance from "@/utils/axiosInstance";
 import { createSlice, createAsyncThunk, PayloadAction } from "@reduxjs/toolkit";
 
-interface ProductCategory {
+export interface ProductCategory {
   id: string;
   title: string;
   update_date: string;
