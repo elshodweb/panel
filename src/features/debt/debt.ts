@@ -1,3 +1,4 @@
+import axiosInstance from "@/utils/axiosInstance";
 import { createSlice, createAsyncThunk, PayloadAction } from "@reduxjs/toolkit";
 import axios from "axios";
 
@@ -17,14 +18,14 @@ interface User {
 
 interface Debt {
   id: string;
-  remaining_debt: string; // Строка, так как в API это строка
-  isActive: string; // В API это строка ("Faol" или "true")
+  remaining_debt: string;
+  isActive: string;
   comment: string;
-  dayToBeGiven: string; // Дата в строковом формате
-  dayGiven: string; // Дата в строковом формате
-  update_date: string; // Дата последнего обновления
-  create_data: string; // Дата создания
-  user_id: User; // Вложенный объект для пользователя
+  dayToBeGiven: string;
+  dayGiven: string;
+  update_date: string;
+  create_data: string;
+  user_id: User;
 }
 
 interface Pagination {
@@ -63,8 +64,8 @@ export const fetchDebts = createAsyncThunk<
   { pageNumber: number; pageSize: number }
 >("debts/fetchDebts", async (params) => {
   const { pageNumber, pageSize } = params;
-  const response = await axios.get<ApiResponse>(
-    `https://control.coachingzona.uz/api/v1/debt/all`,
+  const response = await axiosInstance.get<ApiResponse>(
+    `/debt/all`,
     {
       params: {
         pageNumber,
