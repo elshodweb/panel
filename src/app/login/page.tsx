@@ -25,7 +25,6 @@ const LoginPage = () => {
       setPassword("");
       setError("");
 
-      console.log("Token saqlandi: ", token);
 
       // Перенаправление на другую страницу
       router.push("/dashboard/products/categories");

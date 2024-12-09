@@ -136,7 +136,7 @@ const Sidebar: FC<SidebarProps> = ({ selected, setSelected }) => {
   const router = useRouter();
   const handleLogout = () => {
     // Логика для выхода (например, очистка токена, редирект)
-    console.log("Logging out...");
+
     localStorage.removeItem("token");
     // Допустим, редирект на страницу входа:
     window.location.href = "/login";
@@ -212,7 +212,7 @@ const Sidebar: FC<SidebarProps> = ({ selected, setSelected }) => {
         ))}
       </div>
       <div
-        className={styles.logoutButton}
+
         onClick={() => setIsModalOpen(true)}
       >
         <div className={styles.icon}>

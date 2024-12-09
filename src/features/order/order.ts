@@ -56,7 +56,7 @@ export const fetchOrders = createAsyncThunk<
             },
         }
     );
-    console.log(response);
+
 
     return response.data;
 });

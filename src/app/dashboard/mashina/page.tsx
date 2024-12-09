@@ -154,7 +154,6 @@ const CarServicePage = () => {
       : "/car-service/create";
 
     try {
-      console.log(formData);
 
       const response = await axiosInstance({
         method: isEditMode ? "patch" : "post",

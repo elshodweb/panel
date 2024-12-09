@@ -1,16 +1,23 @@
-'use client';
+"use client";
 import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState, AppDispatch } from "@/store/store";
 import { fetchOrders } from "@/features/order/order"; // Path to the new slice
 import CustomTable from "@/components/Table/Table"; // Assuming you have a component for tables
 import Loader from "@/components/Loader/Loader";
-import styles from './styles.module.scss'
+import styles from "./styles.module.scss";
 import Title from "@/components/Title/Title";
 import AddBtn from "@/components/Buttons/AddBtn/AddBtn";
 import Modal from "@/components/Modal/Modal";
 import axiosInstance from "@/utils/axiosInstance";
-import { Button, FormControl, InputLabel, MenuItem, Select, TextField } from "@mui/material";
+import {
+  Button,
+  FormControl,
+  InputLabel,
+  MenuItem,
+  Select,
+  TextField,
+} from "@mui/material";
 const OrdersPage = () => {
   const dispatch = useDispatch<AppDispatch>();
   const { orders, status, error } = useSelector(
@@ -48,8 +55,6 @@ const OrdersPage = () => {
     dispatch(fetchOrders());
   }, [dispatch]);
 
-  
-  
   const handleDelete = async () => {
     if (!selectedService) return;
 
@@ -59,9 +64,7 @@ const OrdersPage = () => {
       );
 
       if (response.status < 300) {
-        dispatch(
-          fetchOrders()
-        );
+        dispatch(fetchOrders());
         setIsConfirmDeleteOpen(false);
         showSnackbar("Servis muvaffaqiyatli oʻchirildi", "success");
       } else {
@@ -72,9 +75,8 @@ const OrdersPage = () => {
     }
   };
 
-
   const handleUpdate = (order: any) => {
-    console.log("Updating order", order);
+
     // You can dispatch an action for updating an order here
   };
 
@@ -86,7 +88,7 @@ const OrdersPage = () => {
       : "/car-service/create";
 
     try {
-      console.log(formData);
+
 
       const response = await axiosInstance({
         method: isEditMode ? "patch" : "post",
@@ -95,9 +97,7 @@ const OrdersPage = () => {
       });
 
       if (response.status >= 200 && response.status < 300) {
-        dispatch(
-          fetchOrders()
-        );
+        dispatch(fetchOrders());
         setIsModalOpen(false);
         showSnackbar(
           isEditMode
@@ -115,11 +115,10 @@ const OrdersPage = () => {
 
   return (
     <div className={styles.wrapper}>
-
       <div className={styles.row}>
         <Title>Harid qilish</Title>
         <div className={styles.right}>
-          <AddBtn onClick={() => { }} />
+          <AddBtn onClick={() => {}} />
         </div>
       </div>
       {status === "loading" && <Loader />}
@@ -127,18 +126,29 @@ const OrdersPage = () => {
       {status === "succeeded" && (
         <>
           <CustomTable
-            keys={["user_name", "total_price", "paid_total", "isActive", "data_sequence",]}
-            titles={["Foydalanuvchi", "Jami narx", "To'langan jami", "Faol holat", "Sana"]}
-            data={orders.map(order => ({
+            keys={[
+              "user_name",
+              "total_price",
+              "paid_total",
+              "isActive",
+              "data_sequence",
+            ]}
+            titles={[
+              "Foydalanuvchi",
+              "Jami narx",
+              "To'langan jami",
+              "Faol holat",
+              "Sana",
+            ]}
+            data={orders.map((order) => ({
               ...order,
               user_name: `${order.user_id.first_name} ${order.user_id.name}`,
               isActive: order.isActive === "1" ? "Activ" : "Activ emas",
-              data_sequence: order.data_sequence.split('T')[0]
+              data_sequence: order.data_sequence.split("T")[0],
             }))}
-            onDelete={handleDelete}  // Provide onDelete function
-            onUpdate={handleUpdate}  // Provide onUpdate function
+            onDelete={handleDelete} // Provide onDelete function
+            onUpdate={handleUpdate} // Provide onUpdate function
           />
-
         </>
       )}
 
