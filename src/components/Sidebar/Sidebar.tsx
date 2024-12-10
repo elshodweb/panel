@@ -1,5 +1,6 @@
-import React, { FC, useState } from "react";
-import Link from "next/link";
+"use client";
+import React, { FC, useEffect, useRef, useState } from "react";
+import Link from "next/link"; // Import Link from Next.js
 import {
   FaBox,
   FaUsers,
@@ -17,7 +18,7 @@ import {
 import { MdCancelPresentation } from "react-icons/md";
 import styles from "./Sidebar.module.scss";
 import { useRouter } from "next/navigation";
-import Modal from "@/components/Modal/Modal"; // Import your Modal component
+import Modal from "../Modal/Modal";
 
 type MenuItem = {
   id: number;
@@ -38,8 +39,8 @@ const Sidebar: FC<SidebarProps> = ({ selected, setSelected }) => {
   const [openSections, setOpenSections] = useState<{ [key: string]: boolean }>(
     {}
   );
-  const [showLogoutModal, setShowLogoutModal] = useState(false); // State for showing modal
-  const router = useRouter();
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
 
   const toggleSection = (key: string) => {
     setOpenSections((prev) => ({
@@ -47,6 +48,22 @@ const Sidebar: FC<SidebarProps> = ({ selected, setSelected }) => {
       [key]: !prev[key],
     }));
   };
+  const sidebarRef = useRef<HTMLDivElement>(null);
+  const handleOutsideClick = (event: MouseEvent) => {
+    if (
+      sidebarRef.current &&
+      !sidebarRef.current.contains(event.target as Node) &&
+      isOpen
+    ) {
+      setIsOpen(false); // Закрываем sidebar, если клик произошёл за его пределами
+    }
+  };
+  useEffect(() => {
+    document.addEventListener("click", handleOutsideClick);
+    return () => {
+      document.removeEventListener("click", handleOutsideClick);
+    };
+  }, [isOpen]);
 
   const handleLogout = () => {
     localStorage.removeItem("token");
@@ -121,8 +138,11 @@ const Sidebar: FC<SidebarProps> = ({ selected, setSelected }) => {
     },
   ];
 
+  const router = useRouter();
+ 
   return (
     <div
+      ref={sidebarRef}
       className={`${styles.sidebar} ${isOpen ? styles.open : styles.closed}`}
     >
       <button className={styles.toggleBtn} onClick={() => setIsOpen(!isOpen)}>
@@ -133,25 +153,22 @@ const Sidebar: FC<SidebarProps> = ({ selected, setSelected }) => {
           <div key={item.id}>
             {item.children ? (
               <div
-                className={`${styles.menuItem} ${
-                  selected === item.key ? styles.active : ""
-                }`}
+                className={`${styles.menuItem} ${selected === item.key ? styles.active : ""
+                  }`}
                 onClick={() => toggleSection(item.key)}
               >
                 <div className={styles.icon}>{item.icon}</div>
                 {isOpen && <span>{item.name}</span>}
                 <FaChevronRight
-                  className={`${styles.arrow} ${
-                    openSections[item.key] ? styles.open : ""
-                  }`}
+                  className={`${styles.arrow} ${openSections[item.key] ? styles.open : ""
+                    }`}
                 />
               </div>
             ) : (
               <Link href={item.href || "#"} passHref>
                 <div
-                  className={`${styles.menuItem} ${
-                    selected === item.key ? styles.active : ""
-                  }`}
+                  className={`${styles.menuItem} ${selected === item.key ? styles.active : ""
+                    }`}
                   onClick={() => {
                     setSelected(item.key);
                     setIsOpen(false);
@@ -164,16 +181,14 @@ const Sidebar: FC<SidebarProps> = ({ selected, setSelected }) => {
             )}
             {item.children && (
               <div
-                className={`${styles.subMenu} ${
-                  openSections[item.key] ? styles.open : styles.closed
-                }`}
+                className={`${styles.subMenu} ${openSections[item.key] ? styles.open : styles.closed
+                  }`}
               >
                 {item.children.map((subItem) => (
                   <Link href={subItem.href || "#"} passHref key={subItem.id}>
                     <div
-                      className={`${styles.subMenuItem} ${
-                        selected === subItem.key ? styles.active : ""
-                      }`}
+                      className={`${styles.subMenuItem} ${selected === subItem.key ? styles.active : ""
+                        }`}
                       onClick={() => {
                         setSelected(subItem.key);
                         setIsOpen(false);
@@ -191,42 +206,32 @@ const Sidebar: FC<SidebarProps> = ({ selected, setSelected }) => {
           </div>
         ))}
       </div>
-      <button
-        className={styles.logoutBtn}
-        onClick={() => setShowLogoutModal(true)} // Open modal on click
-      >
-        <FaSignOutAlt className={styles.icon} />
-        {isOpen && <span>Logout</span>}
-      </button>
+      <div
 
-      {/* Confirmation Modal for Logout */}
-      {showLogoutModal && (
-        <Modal
-          isOpen={showLogoutModal}
-          onClose={() => setShowLogoutModal(false)}
-          title="Chiqish tasdiqlash"
-        >
-          <p className={styles.modalMessage}>Chiqmoqchimisiz?</p>
-          <div className={styles.modalActions}>
-            <button
-              className={styles.cancelButton}
-              onClick={() => setShowLogoutModal(false)}
-            >
-              {" "}
-              Bekor qilish
-            </button>
-            <button
-              onClick={() => {
-                setShowLogoutModal(false);
-                handleLogout();
-              }}
-              className={styles.confirmButton}
-            >
-              Tasdiqlash
-            </button>
-          </div>
-        </Modal>
-      )}
+        onClick={() => setIsModalOpen(true)}
+      >
+        <div className={styles.icon}>
+          <FaSignOutAlt />
+        </div>
+        {isOpen && <span>Logout</span>}
+      </div>
+      <Modal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        title="Tizimdan chiqishni tasdiqlash"
+      >
+        <p className={styles.text}>Haqiqatan ham tizimdan chiqishni xohlaysizmi?</p>
+        <div className={styles.modalFooter}>
+          <button onClick={handleLogout} className={styles.confirmButton}>
+            Ha, Chiqish
+          </button>
+          <button onClick={() => setIsModalOpen(false)} className={styles.cancelButton}>
+            Bekor qilish
+          </button>
+        </div>
+      </Modal>
+
+
     </div>
   );
 };

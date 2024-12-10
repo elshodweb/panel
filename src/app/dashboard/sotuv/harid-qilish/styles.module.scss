@@ -1,0 +1,160 @@
+.wrapper {
+  padding-top: 70px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.row {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: 10px;
+  position: fixed;
+  top: 0;
+  width: calc(100% - 80px);
+  background: #fff;
+  z-index: 2;
+  padding: 15px;
+  gap: 10px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.autocomplete {
+  max-width: 300px;
+  width: 100%;
+  display: block;
+}
+
+.content {
+  padding-left: 10%;
+  padding-right: 10%;
+  margin-top: 80px;
+  max-width: 1200px; /* Устанавливаем максимальную ширину */
+  width: 100%;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.section {
+  border: 1px solid #e1e1e1;
+  padding: 10px;
+  border-radius: 10px;
+  margin-bottom: 10px;
+  max-width: 900px;
+  background-color: #fff;
+}
+
+.product {
+  max-width: 900px;
+  background-color: #fff;
+  padding: 10px;
+  border: 1px solid #ddd; /* Светлее бордер для лучшего контраста */
+  border-radius: 10px;
+  margin-bottom: 20px;
+}
+
+.title {
+  margin: 0;
+  margin-bottom: 10px;
+  margin-top: 10px;
+  padding: 0;
+  text-transform: capitalize;
+}
+
+.productRow {
+  display: flex;
+  justify-content: space-between;
+  gap: 15px; /* Увеличен зазор между колонками */
+  margin-bottom: 10px;
+}
+
+.left,
+.right {
+  width: 48%; /* Немного уменьшено, чтобы было пространство между */
+}
+
+.del {
+  height: max-content;
+}
+
+.selectedProductInfo {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 10px;
+  font-size: 14px;
+  color: #555;
+}
+
+.productInput {
+  width: 100px;
+  padding: 8px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 14px;
+  margin-right: 10px;
+}
+
+.productDateInput {
+  width: 150px;
+  padding: 8px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 14px;
+  margin-right: 10px;
+}
+
+.productButton {
+  padding: 8px 16px;
+  border-radius: 4px;
+  font-size: 14px;
+  margin-top: 10px;
+}
+
+.productButton:hover {
+  background-color: #0056b3;
+  color: white;
+}
+.carRow {
+  display: flex;
+  border: 1px solid #e1e1e1;
+  padding: 10px;
+  border-radius: 10px;
+  margin: 10px 0;
+  max-width: 900px;
+  background-color: #fff;
+}
+.carLeft {
+  width: 50%;
+}
+.carRight {
+  width: 50%;
+}
+.btnWithIcon {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.btns {
+  display: flex;
+  width: 100%;
+  justify-content: space-between;
+  align-items: center;
+}
+@media (max-width: 768px) {
+  .content {
+    padding-left: 5%;
+    padding-right: 5%;
+  }
+
+  .productRow {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .left,
+  .right {
+    width: 100%;
+    max-width: none;
+  }
+}

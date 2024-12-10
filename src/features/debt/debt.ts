@@ -1,19 +1,51 @@
-import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
+import axiosInstance from "@/utils/axiosInstance";
+import { createSlice, createAsyncThunk, PayloadAction } from "@reduxjs/toolkit";
 import axios from "axios";
 
-
-interface DebtState {
-  debts: any[];
-  status: "idle" | "loading" | "succeeded" | "failed";
-  error: string | null;
-  pagination: {
-    currentPage: number;
-    totalPages: number;
-    pageSize: number;
-    totalItems: number;
-  };
+interface User {
+  id: string;
+  first_name: string;
+  name: string;
+  last_name: string;
+  password: string;
+  role: string;
+  phone: string;
+  img: string | null;
+  comment: string;
+  update_date: string;
+  create_data: string;
 }
 
+interface Debt {
+  id: string;
+  remaining_debt: string;
+  isActive: string;
+  comment: string;
+  dayToBeGiven: string;
+  dayGiven: string;
+  update_date: string;
+  create_data: string;
+  user_id: User;
+}
+
+interface Pagination {
+  currentPage: number;
+  totalPages: number;
+  pageSize: number;
+  totalItems: number;
+}
+
+interface ApiResponse {
+  results: Debt[];
+  pagination: Pagination;
+}
+
+interface DebtState {
+  debts: Debt[];
+  status: "idle" | "loading" | "succeeded" | "failed";
+  error: string | null;
+  pagination: Pagination;
+}
 
 const initialState: DebtState = {
   debts: [],
@@ -27,26 +59,25 @@ const initialState: DebtState = {
   },
 };
 
-
-export const fetchDebts = createAsyncThunk(
-  "debts/fetchDebts",
-  async (params: { pageNumber: number; pageSize: number }) => {
-    const { pageNumber, pageSize } = params;
-    const response = await axios.get(
-      `https://control.coachingzona.uz/api/v1/debt/all`,
-      {
-        params: {
-          pageNumber,
-          pageSize,
-        },
-        headers: {
-          accept: "*/*",
-        },
-      }
-    );
-    return response.data;
-  }
-);
+export const fetchDebts = createAsyncThunk<
+  ApiResponse,
+  { pageNumber: number; pageSize: number }
+>("debts/fetchDebts", async (params) => {
+  const { pageNumber, pageSize } = params;
+  const response = await axiosInstance.get<ApiResponse>(
+    `/debt/all`,
+    {
+      params: {
+        pageNumber,
+        pageSize,
+      },
+      headers: {
+        accept: "*/*",
+      },
+    }
+  );
+  return response.data;
+});
 
 const debtSlice = createSlice({
   name: "debts",
@@ -58,15 +89,10 @@ const debtSlice = createSlice({
         state.status = "loading";
         state.error = null;
       })
-      .addCase(fetchDebts.fulfilled, (state, action) => {
+      .addCase(fetchDebts.fulfilled, (state, action: PayloadAction<ApiResponse>) => {
         state.status = "succeeded";
         state.debts = action.payload.results;
-        state.pagination = {
-          currentPage: Number(action.payload.pagination.currentPage),
-          totalPages: Number(action.payload.pagination.totalPages),
-          pageSize: Number(action.payload.pagination.pageSize),
-          totalItems: Number(action.payload.pagination.totalItems),
-        };
+        state.pagination = action.payload.pagination;
       })
       .addCase(fetchDebts.rejected, (state, action) => {
         state.status = "failed";

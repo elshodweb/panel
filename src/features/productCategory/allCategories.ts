@@ -1,9 +1,13 @@
 import axiosInstance from "@/utils/axiosInstance";
-import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
+import { createSlice, createAsyncThunk, PayloadAction } from "@reduxjs/toolkit";
 
 interface ProductCategory {
   id: string;
   title: string;
+}
+
+interface ApiResponse {
+  results: ProductCategory[];
 }
 
 interface ProductCategoryState {
@@ -14,20 +18,20 @@ interface ProductCategoryState {
 
 const initialState: ProductCategoryState = {
   categories: [],
-
   status: "idle",
   error: null,
 };
 
-export const fetchAllCategories = createAsyncThunk(
+export const fetchAllCategories = createAsyncThunk<ApiResponse>(
   "AllCategories/fetchAllCategories",
-  async () => {
-    const response = await axiosInstance.get(
+  async (): Promise<ApiResponse> => {
+    const response = await axiosInstance.get<ApiResponse>(
       `/product-categories/all-with-sort?title=null&pageNumber=1&pageSize=200`
     );
     return response.data;
   }
 );
+
 
 const productCategorySlice = createSlice({
   name: "AllCategories",
@@ -38,7 +42,7 @@ const productCategorySlice = createSlice({
       .addCase(fetchAllCategories.pending, (state) => {
         state.status = "loading";
       })
-      .addCase(fetchAllCategories.fulfilled, (state, action) => {
+      .addCase(fetchAllCategories.fulfilled, (state, action: PayloadAction<ApiResponse>) => {
         state.status = "succeeded";
         state.categories = action.payload.results;
       })

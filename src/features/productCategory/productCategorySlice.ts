@@ -1,7 +1,7 @@
 import axiosInstance from "@/utils/axiosInstance";
-import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
+import { createSlice, createAsyncThunk, PayloadAction } from "@reduxjs/toolkit";
 
-interface ProductCategory {
+export interface ProductCategory {
   id: string;
   title: string;
   update_date: string;
@@ -13,6 +13,11 @@ interface Pagination {
   totalPages: number;
   pageSize: number;
   totalItems: number;
+}
+
+interface ApiResponse {
+  results: ProductCategory[];
+  pagination: Pagination;
 }
 
 interface ProductCategoryState {
@@ -34,10 +39,10 @@ const initialState: ProductCategoryState = {
   error: null,
 };
 
-export const fetchProductCategories = createAsyncThunk(
+export const fetchProductCategories = createAsyncThunk<ApiResponse, { title: string; pageNumber: number; pageSize: number }>(
   "productCategories/fetchProductCategories",
-  async (params: { title: string; pageNumber: number; pageSize: number }) => {
-    const response = await axiosInstance.get(
+  async (params) => {
+    const response = await axiosInstance.get<ApiResponse>(
       `/product-categories/all-with-sort?title=${params.title}&pageNumber=${params.pageNumber}&pageSize=${params.pageSize}`
     );
     return response.data;
@@ -53,15 +58,10 @@ const productCategorySlice = createSlice({
       .addCase(fetchProductCategories.pending, (state) => {
         state.status = "loading";
       })
-      .addCase(fetchProductCategories.fulfilled, (state, action) => {
+      .addCase(fetchProductCategories.fulfilled, (state, action: PayloadAction<ApiResponse>) => {
         state.status = "succeeded";
         state.categories = action.payload.results;
-        state.pagination = {
-          currentPage: parseInt(action.payload.pagination.currentPage),
-          totalPages: action.payload.pagination.totalPages,
-          pageSize: parseInt(action.payload.pagination.pageSize),
-          totalItems: action.payload.pagination.totalItems,
-        };
+        state.pagination = action.payload.pagination;
       })
       .addCase(fetchProductCategories.rejected, (state, action) => {
         state.status = "failed";

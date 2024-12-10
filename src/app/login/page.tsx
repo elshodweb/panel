@@ -15,7 +15,7 @@ const LoginPage = () => {
     e.preventDefault();
 
     try {
-      const response = await axiosInstance.post("/Auth/user/signIn", {
+      const response: any = await axiosInstance.post("/Auth/user/signIn", {
         phone,
         password,
       });
@@ -25,7 +25,6 @@ const LoginPage = () => {
       setPassword("");
       setError("");
 
-      console.log("Token saqlandi: ", token);
 
       // Перенаправление на другую страницу
       router.push("/dashboard/products/categories");
