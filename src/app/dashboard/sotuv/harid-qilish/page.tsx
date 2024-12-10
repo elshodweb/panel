@@ -43,6 +43,7 @@ const Page = () => {
       quantity: 1, // Для количества продукта
       rentalDays: 1, // Для дней аренды
       totalPrice: 0, // Для вычисленной стоимости аренды
+      dailyPrice: 0,
       type: "",
       price: 0,
       startDate: "", // Добавляем дату начала аренды
@@ -54,7 +55,6 @@ const Page = () => {
   );
   const [selectedCar, setSelectedCar] = useState<any>(null);
   const [driverComment, setDriverComment] = useState("");
-
 
   useEffect(() => {
     dispatch(
@@ -126,6 +126,7 @@ const Page = () => {
         quantity: 1,
         rentalDays: 1,
         totalPrice: 0,
+        dailyPrice: 0,
         price: 0,
         type: "",
         startDate: "", // Начальная дата
@@ -167,28 +168,32 @@ const Page = () => {
   const handleSelectProduct = (index: number, value: any) => {
     const newSections = [...sections];
     newSections[index].selectedProduct = value;
-    newSections[index].totalPrice = 0;
-    newSections[index].totalPrice = value.price;
+    newSections[index].dailyPrice = value.price * sections[index].quantity;
+    newSections[index].totalPrice = value.price * sections[index].quantity; ////
     newSections[index].price = value.price;
     newSections[index].type = value.type;
     setSections(newSections);
+    newSections[index].dailyPrice = value.price;
   };
 
   const handleQuantityChange = (index: number, value: number) => {
     const newSections = [...sections];
     newSections[index].quantity = value;
     updateTotalPrice(index, newSections[index]);
-    setSections(newSections);
-  };
-
-  const handleRentalDaysChange = (index: number, value: number) => {
-    const newSections = [...sections];
-    newSections[index].rentalDays = value;
-    updateTotalPrice(index, newSections[index]);
+    updateDaylyPrice(index, newSections[index]);
     setSections(newSections);
   };
 
   const updateTotalPrice = (index: number, section: any) => {
+    if (section.selectedProduct) {
+      const totalPrice = section.selectedProduct.price * section.quantity;
+      const newSections = [...sections];
+      newSections[index].totalPrice = totalPrice;
+      setSections(newSections);
+    }
+  };
+
+  const updateDaylyPrice = (index: number, section: any) => {
     if (section.selectedProduct) {
       const totalPrice = section.selectedProduct.price * section.quantity;
       const newSections = [...sections];
@@ -228,6 +233,7 @@ const Page = () => {
 
     setSections(newSections);
   };
+  console.log(sections);
 
   const handleCarSelect = (car: any) => {
     setSelectedCar(car); // Обновляем выбранную машину
@@ -380,6 +386,20 @@ const Page = () => {
                         handleStartDateChange(index, e.target.value)
                       }
                     />
+                  </div>
+                </div>
+
+                <div className={styles.productRow}>
+                  <div className={styles.left}>
+                    <h4 className={styles.title}>Arenda Umumiy narxi</h4>
+                    <TextField
+                      type="number"
+                      variant="outlined"
+                      value={sections[index].totalPrice}
+                      disabled
+                    />
+                  </div>
+                  <div className={styles.right}>
                     <h4 className={styles.title}>Arenda tugashi</h4>
                     <TextField
                       type="date"
