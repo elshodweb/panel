@@ -1,6 +1,5 @@
-"use client";
 import React, { FC, useState } from "react";
-import Link from "next/link"; // Import Link from Next.js
+import Link from "next/link";
 import {
   FaBox,
   FaUsers,
@@ -13,16 +12,19 @@ import {
   FaClipboardList,
   FaTags,
   FaCheck,
+  FaSignOutAlt,
 } from "react-icons/fa";
 import { MdCancelPresentation } from "react-icons/md";
 import styles from "./Sidebar.module.scss";
+import { useRouter } from "next/navigation";
+import Modal from "@/components/Modal/Modal"; // Import your Modal component
 
 type MenuItem = {
   id: number;
   name: string;
   icon: JSX.Element;
   key: string;
-  href?: string; // Сделаем href опциональным для родительских элементов
+  href?: string;
   children?: MenuItem[];
 };
 
@@ -36,6 +38,8 @@ const Sidebar: FC<SidebarProps> = ({ selected, setSelected }) => {
   const [openSections, setOpenSections] = useState<{ [key: string]: boolean }>(
     {}
   );
+  const [showLogoutModal, setShowLogoutModal] = useState(false); // State for showing modal
+  const router = useRouter();
 
   const toggleSection = (key: string) => {
     setOpenSections((prev) => ({
@@ -44,24 +48,29 @@ const Sidebar: FC<SidebarProps> = ({ selected, setSelected }) => {
     }));
   };
 
+  const handleLogout = () => {
+    localStorage.removeItem("token");
+    router.push("/login");
+  };
+
   const menuItems: MenuItem[] = [
     {
       id: 1,
       name: "Products",
-      icon: <FaBox />, // Иконка коробки для товаров
+      icon: <FaBox />,
       key: "products",
       children: [
         {
           id: 11,
           name: "Pr. Categories",
-          icon: <FaTags />, // Иконка для категорий продуктов
+          icon: <FaTags />,
           key: "product-categories",
           href: "/dashboard/products/categories",
         },
         {
           id: 12,
           name: "Products",
-          icon: <FaClipboardList />, // Иконка для списка продуктов
+          icon: <FaClipboardList />,
           key: "product-list",
           href: "/dashboard/products/list",
         },
@@ -70,27 +79,27 @@ const Sidebar: FC<SidebarProps> = ({ selected, setSelected }) => {
     {
       id: 2,
       name: "Users",
-      icon: <FaUsers />, // Иконка пользователей
+      icon: <FaUsers />,
       key: "users",
       href: "/dashboard/users",
     },
     {
       id: 3,
       name: "Sotuv",
-      icon: <FaShoppingCart />, // Иконка корзины для продаж
+      icon: <FaShoppingCart />,
       key: "sotuv",
       children: [
         {
           id: 31,
           name: "Harid qilish",
-          icon: <FaCheck />, // Иконка галочки для "Покупка"
+          icon: <FaCheck />,
           key: "harid-qilish",
           href: "/dashboard/sotuv/harid-qilish",
         },
         {
           id: 32,
           name: "Haridni tugatish",
-          icon: <MdCancelPresentation />, // Иконка для завершения покупки
+          icon: <MdCancelPresentation />,
           key: "harid-tugatish",
           href: "/dashboard/sotuv/harid-tugatish",
         },
@@ -99,14 +108,14 @@ const Sidebar: FC<SidebarProps> = ({ selected, setSelected }) => {
     {
       id: 4,
       name: "Qarz",
-      icon: <FaMoneyBillWave />, // Иконка денег для долгов
+      icon: <FaMoneyBillWave />,
       key: "qarz",
       href: "/dashboard/qarz",
     },
     {
       id: 5,
       name: "Mashina",
-      icon: <FaCar />, // Иконка машины
+      icon: <FaCar />,
       key: "mashina",
       href: "/dashboard/mashina",
     },
@@ -122,7 +131,6 @@ const Sidebar: FC<SidebarProps> = ({ selected, setSelected }) => {
       <div className={styles.menuList}>
         {menuItems.map((item) => (
           <div key={item.id}>
-            {/* Если у элемента есть дочерние пункты, не делаем его ссылкой */}
             {item.children ? (
               <div
                 className={`${styles.menuItem} ${
@@ -154,8 +162,6 @@ const Sidebar: FC<SidebarProps> = ({ selected, setSelected }) => {
                 </div>
               </Link>
             )}
-
-            {/* Отображаем дочерние пункты, если они есть */}
             {item.children && (
               <div
                 className={`${styles.subMenu} ${
@@ -185,6 +191,42 @@ const Sidebar: FC<SidebarProps> = ({ selected, setSelected }) => {
           </div>
         ))}
       </div>
+      <button
+        className={styles.logoutBtn}
+        onClick={() => setShowLogoutModal(true)} // Open modal on click
+      >
+        <FaSignOutAlt className={styles.icon} />
+        {isOpen && <span>Logout</span>}
+      </button>
+
+      {/* Confirmation Modal for Logout */}
+      {showLogoutModal && (
+        <Modal
+          isOpen={showLogoutModal}
+          onClose={() => setShowLogoutModal(false)}
+          title="Chiqish tasdiqlash"
+        >
+          <p className={styles.modalMessage}>Chiqmoqchimisiz?</p>
+          <div className={styles.modalActions}>
+            <button
+              className={styles.cancelButton}
+              onClick={() => setShowLogoutModal(false)}
+            >
+              {" "}
+              Bekor qilish
+            </button>
+            <button
+              onClick={() => {
+                setShowLogoutModal(false);
+                handleLogout();
+              }}
+              className={styles.confirmButton}
+            >
+              Tasdiqlash
+            </button>
+          </div>
+        </Modal>
+      )}
     </div>
   );
 };

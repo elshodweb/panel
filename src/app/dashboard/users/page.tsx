@@ -176,7 +176,7 @@ const UsersPage = () => {
         </div>
       </div>
 
-      {status === "loading" &&        <Loader />}
+      {status === "loading" && <Loader />}
       {status === "failed" && <p>Xatolik: {error}</p>}
       {status === "succeeded" && (
         <>
@@ -194,7 +194,14 @@ const UsersPage = () => {
             titles={titles}
             data={users.map((user: any) => ({
               id: user.id,
-              image: <CircularImage src={user.image} />,
+              image: (
+                <CircularImage
+                  src={
+                    "https://storage.googleapis.com/control_business/" +
+                    user.image
+                  }
+                />
+              ),
               first_name: user.first_name,
               name: user.name,
               last_name: user.last_name,
