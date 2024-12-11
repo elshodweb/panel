@@ -55,6 +55,8 @@ const Page = () => {
   );
   const [selectedCar, setSelectedCar] = useState<any>(null);
   const [driverComment, setDriverComment] = useState("");
+  const [autocompleteProducts, setAutocompleteProducts] = useState(products);
+  const [titleOrId, setTitleOrId] = useState("");
 
   useEffect(() => {
     dispatch(
@@ -70,18 +72,22 @@ const Page = () => {
   const updateProducts = (
     index: number,
     categoryId: string | null,
-    productTitle: string
+    productTitle: string,
+    searchableTitleId: string | null = null
   ) => {
     dispatch(
       fetchProducts({
         pageNumber: 1,
         pageSize: 100,
         searchTitle: productTitle,
-        searchable_title_id: "null",
+        searchable_title_id: searchableTitleId || "null",
         category_id: categoryId || "null",
       })
     );
   };
+  useEffect(() => {
+    setAutocompleteProducts(products);
+  }, [products]);
 
   useEffect(() => {
     dispatch(
@@ -166,10 +172,12 @@ const Page = () => {
   };
 
   const handleSelectProduct = (index: number, value: any) => {
+    if (!value) return; // Проверка на null или undefined
+
     const newSections = [...sections];
     newSections[index].selectedProduct = value;
-    newSections[index].dailyPrice = value.price * sections[index].quantity;
-    newSections[index].totalPrice = value.price * sections[index].quantity; ////
+    newSections[index].dailyPrice = value?.price * sections[index].quantity;
+    newSections[index].totalPrice = value.price * sections[index].quantity;
     newSections[index].price = value.price;
     newSections[index].type = value.type;
     setSections(newSections);
@@ -233,7 +241,6 @@ const Page = () => {
 
     setSections(newSections);
   };
-  console.log(sections);
 
   const handleCarSelect = (car: any) => {
     setSelectedCar(car); // Обновляем выбранную машину
@@ -321,20 +328,34 @@ const Page = () => {
                 <Autocomplete
                   className={styles.autocomplete}
                   size="small"
-                  options={products}
+                  options={autocompleteProducts}
                   onChange={(event, value) => handleSelectProduct(index, value)}
-                  getOptionLabel={(option) => option.title || "Без названия"}
+                  getOptionLabel={(option: any) =>
+                    option.title + " (" + option.searchable_title_id + ")" ||
+                    "Без названия"
+                  }
+                  clearIcon={false}
                   isOptionEqualToValue={(option, value) =>
                     option.id === value.id
                   }
                   renderInput={(params) => (
                     <TextField
                       {...params}
-                      label="Mahsulot"
+                      value={titleOrId}
+                      label="Product"
                       variant="outlined"
-                      onChange={(e) =>
-                        handleChangeProductTitle(index, e.target.value)
-                      }
+                      onChange={(e) => {
+                        const inputValue = e.target.value;
+                        setTitleOrId(inputValue);
+                        const isNumeric = /^\d+$/.test(inputValue);
+
+                        updateProducts(
+                          index,
+                          sections[index].selectedCategory?.id || null,
+                          isNumeric ? "" : inputValue, // Если цифры, не передаем title
+                          isNumeric ? inputValue : null // Если цифры, ищем по searchable_title_id
+                        );
+                      }}
                     />
                   )}
                 />
