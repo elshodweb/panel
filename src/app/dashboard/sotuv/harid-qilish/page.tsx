@@ -12,11 +12,13 @@ import {
   FaBox,
   FaCar,
   FaCartPlus,
+  FaPaperPlane,
   FaPlus,
   FaTrash,
   FaUser,
 } from "react-icons/fa";
 import { fetchCarServices } from "@/features/cars/cars";
+import axiosInstance from "@/utils/axiosInstance";
 
 const Page = () => {
   const dispatch = useDispatch<AppDispatch>();
@@ -161,14 +163,45 @@ const Page = () => {
     updateProducts(index, value?.id, newSections[index].productTitle);
   };
 
-  const handleChangeProductTitle = (index: number, value: string) => {
-    const newSections: any = [...sections];
-    newSections[index].productTitle = value;
-    updateProducts(
-      index,
-      newSections[index].selectedCategory?.id || null,
-      value
-    );
+  const handleSubmit = async () => {
+    const requestData = {
+      user_id: selectedUser?.id || "",
+      daily_price: sections[0]?.dailyPrice || "0",
+      total_price: sections
+        .reduce((acc, section) => acc + section.totalPrice, 0)
+        .toString(),
+      paid_total: "0", // Здесь можно установить оплаченный баланс
+      products: sections.map((section) => ({
+        product_id: section.selectedProduct?.id || "",
+        measurement_sold: section.quantity.toString(),
+        quantity_sold: section.quantity.toString(),
+        price_per_day: section.dailyPrice.toString(),
+        unused_days: "0", // Можете добавить свои данные
+        given_date: section.startDate,
+        end_date: section.endDate,
+      })),
+      service_car: selectedCar
+        ? [
+            {
+              price: selectedCar?.price || "0",
+              comment: driverComment || "",
+            },
+          ]
+        : [],
+    };
+
+    try {
+      const response = await axiosInstance.post("/order/create", requestData);
+      console.log("Успешный ответ:", response.data);
+      alert("Данные успешно отправлены");
+    } catch (error: any) {
+      console.error("Ошибка при отправке данных:", error);
+      alert(
+        `Ошибка при отправке данных: ${
+          error.response?.data?.message || error.message
+        }`
+      );
+    }
   };
 
   const handleSelectProduct = (index: number, value: any) => {
@@ -503,8 +536,19 @@ const Page = () => {
         <div className={styles.btns}>
           <Button
             variant="contained"
+            color="warning"
+            onClick={handleSubmit}
+            className={styles.btnWithIcon}
+            style={{ marginLeft: "auto", marginTop: 40 }}
+          >
+            <FaPaperPlane size={22} />
+            <span>Chek (PDF)</span>
+          </Button>
+
+          <Button
+            variant="contained"
             color="secondary"
-            onClick={handleAddSection}
+            onClick={handleSubmit}
             className={styles.btnWithIcon}
             style={{ marginLeft: "auto", marginTop: 40 }}
           >
