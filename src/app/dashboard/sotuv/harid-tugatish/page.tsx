@@ -76,7 +76,6 @@ const OrdersPage = () => {
   };
 
   const handleUpdate = (order: any) => {
-
     // You can dispatch an action for updating an order here
   };
 
@@ -88,8 +87,6 @@ const OrdersPage = () => {
       : "/car-service/create";
 
     try {
-
-
       const response = await axiosInstance({
         method: isEditMode ? "patch" : "post",
         url: endpoint,

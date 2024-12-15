@@ -2,7 +2,7 @@
 import React, { useEffect, useState } from "react";
 import styles from "./styles.module.scss";
 import Title from "@/components/Title/Title";
-import { Autocomplete, TextField, Button, InputAdornment } from "@mui/material";
+import { Autocomplete, TextField, Button } from "@mui/material";
 import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch, RootState } from "@/store/store";
 import { fetchUsers } from "@/features/users/users";
@@ -12,11 +12,14 @@ import {
   FaBox,
   FaCar,
   FaCartPlus,
+  FaPaperPlane,
   FaPlus,
   FaTrash,
   FaUser,
 } from "react-icons/fa";
 import { fetchCarServices } from "@/features/cars/cars";
+import axiosInstance from "@/utils/axiosInstance";
+import { RentalDetails } from "../../../../../types";
 
 const Page = () => {
   const dispatch = useDispatch<AppDispatch>();
@@ -36,20 +39,20 @@ const Page = () => {
   const [originalProducts, setOriginalProducts] = useState<any[]>([]);
 
 
-  const [sections, setSections] = useState([
+  const [sections, setSections] = useState<RentalDetails[]>([
     {
       selectedCategory: null,
       categoryTitle: "",
       selectedProduct: null,
       productTitle: "",
-      quantity: 1, // Для количества продукта
-      rentalDays: 1, // Для дней аренды
-      totalPrice: 0, // Для вычисленной стоимости аренды
+      quantity: 1,
+      rentalDays: 1,
+      totalPrice: 0,
       dailyPrice: 0,
       type: "",
       price: 0,
-      startDate: "", // Добавляем дату начала аренды
-      endDate: "", // Добавляем дату конца аренды
+      startDate: "",
+      endDate: "",
     },
   ]);
   const { carServices, status, error } = useSelector(
@@ -57,6 +60,8 @@ const Page = () => {
   );
   const [selectedCar, setSelectedCar] = useState<any>(null);
   const [driverComment, setDriverComment] = useState("");
+  const [autocompleteProducts, setAutocompleteProducts] = useState(products);
+  const [titleOrId, setTitleOrId] = useState("");
 
   useEffect(() => {
     dispatch(
@@ -72,18 +77,22 @@ const Page = () => {
   const updateProducts = (
     index: number,
     categoryId: string | null,
-    productTitle: string
+    productTitle: string,
+    searchableTitleId: string | null = null
   ) => {
     dispatch(
       fetchProducts({
         pageNumber: 1,
         pageSize: 100,
         searchTitle: productTitle,
-        searchable_title_id: "null",
+        searchable_title_id: searchableTitleId || "null",
         category_id: categoryId || "null",
       })
     );
   };
+  useEffect(() => {
+    setAutocompleteProducts(products);
+  }, [products]);
 
   useEffect(() => {
     dispatch(
@@ -162,39 +171,56 @@ const Page = () => {
     updateProducts(index, value?.id, newSections[index].productTitle);
   };
 
-  const handleChangeProductTitle = (index: number, value: string) => {
-    const newSections: any = [...sections];
-    newSections[index].productTitle = value;
+  const handleSubmit = async () => {
+    const requestData = {
+      user_id: selectedUser?.id || "",
+      daily_price: sections[0]?.dailyPrice || "0",
+      total_price: sections
+        .reduce((acc, section) => acc + section.totalPrice, 0)
+        .toString(),
+      paid_total: "0",
+      products: sections.map((section) => ({
+        product_id: section.selectedProduct?.id || "",
+        measurement_sold: section.quantity.toString(),
+        quantity_sold: section.quantity.toString(),
+        price_per_day: section.dailyPrice.toString(),
+        unused_days: "0",
+        given_date: section.startDate,
+        end_date: section.endDate,
+      })),
+      service_car: selectedCar
+        ? [
+            {
+              price: selectedCar?.price || "0",
+              comment: driverComment || "",
+            },
+          ]
+        : [],
+    };
 
-    const filteredProducts = originalProducts.filter((product) => {
-      if (/^\d+$/.test(value)) {
-        // Если ввод только цифры, ищем по searchable_title_id
-        console.log(product.searchable_title_id.includes(value));
-
-        return product.searchable_title_id.includes(value);
-      } else {
-        // Иначе ищем по названию
-        return product.title.toLowerCase().includes(value.toLowerCase());
-      }
-    });
-
-    setSections(newSections);
-    setOriginalProducts(filteredProducts);
+    try {
+      const response = await axiosInstance.post("/order/create", requestData);
+      console.log("Успешный ответ:", response.data);
+      alert("Данные успешно отправлены");
+    } catch (error: any) {
+      console.error("Ошибка при отправке данных:", error);
+      alert(
+        `Ошибка при отправке данных: ${
+          error.response?.data?.message || error.message
+        }`
+      );
+    }
   };
 
   const handleSelectProduct = (index: number, value: any) => {
+    if (!value) return;
+
     const newSections = [...sections];
-
-    newSections[index] = {
-      ...newSections[index],
-      selectedProduct: value,
-      dailyPrice: +value.price,
-      totalPrice:
-        +value.price * sections[index].quantity * sections[index].rentalDays,
-      price: value.price,
-      type: value.type,
-    };
-
+    newSections[index].selectedProduct = value;
+    newSections[index].dailyPrice = value?.price * sections[index].quantity;
+    newSections[index].totalPrice = value.price * sections[index].quantity;
+    newSections[index].price = value.price;
+    newSections[index].type = value.type;
     setSections(newSections);
   };
 
@@ -230,12 +256,10 @@ const Page = () => {
     if (newSections[index].endDate) {
       const startDate = new Date(date);
       const endDate = new Date(newSections[index].endDate);
-      const rentalDays = Math.max(
-        1,
-        Math.ceil(
-          (endDate.getTime() - startDate.getTime()) / (1000 * 3600 * 24)
-        )
+      const rentalDays = Math.ceil(
+        (endDate.getTime() - startDate.getTime()) / (1000 * 3600 * 24)
       );
+
       newSections[index].rentalDays = rentalDays;
     } else {
       newSections[index].rentalDays = 1;
@@ -248,19 +272,14 @@ const Page = () => {
   const handleEndDateChange = (index: number, date: string) => {
     const newSections = [...sections];
     newSections[index].endDate = date;
-
     if (newSections[index].startDate) {
       const startDate = new Date(newSections[index].startDate);
       const endDate = new Date(date);
-      const rentalDays = Math.max(
-        1,
-        Math.ceil(
-          (endDate.getTime() - startDate.getTime()) / (1000 * 3600 * 24)
-        )
+      const rentalDays = Math.ceil(
+        (endDate.getTime() - startDate.getTime()) / (1000 * 3600 * 24)
       );
+
       newSections[index].rentalDays = rentalDays;
-    } else {
-      newSections[index].rentalDays = 1; // Если дата начала не задана
     }
 
     updateTotalPrice(index, newSections[index]);
@@ -268,11 +287,11 @@ const Page = () => {
   };
 
   const handleCarSelect = (car: any) => {
-    setSelectedCar(car); // Обновляем выбранную машину
+    setSelectedCar(car);
   };
 
   const handleCommentChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setDriverComment(e.target.value); // Обновляем комментарий для водителя
+    setDriverComment(e.target.value);
   };
 
   return (
@@ -284,7 +303,7 @@ const Page = () => {
       <div className={styles.content}>
         <div className={styles.section}>
           <h4 className={styles.title}>
-            Foydalanuvchi tanlash <FaUser size={19} />{" "}
+            Foydalanuvchi tanlash <FaUser size={19} />
           </h4>
           <Autocomplete
             className={styles.autocomplete}
@@ -353,20 +372,33 @@ const Page = () => {
                 <Autocomplete
                   className={styles.autocomplete}
                   size="small"
-                  options={products}
+                  options={autocompleteProducts}
                   onChange={(event, value) => handleSelectProduct(index, value)}
-                  getOptionLabel={(option) => option.title || "Без названия"}
+                  getOptionLabel={(option: any) =>
+                    option.title + " (" + option.searchable_title_id + ")" ||
+                    "Без названия"
+                  }
+                  clearIcon={false}
                   isOptionEqualToValue={(option, value) =>
                     option.id === value.id
                   }
                   renderInput={(params) => (
                     <TextField
                       {...params}
-                      label="Mahsulot"
+                      value={titleOrId}
+                      label="Product"
                       variant="outlined"
                       onChange={(e) => {
                         const inputValue = e.target.value;
-                        handleChangeProductTitle(index, inputValue);
+                        setTitleOrId(inputValue);
+                        const isNumeric = /^\d+$/.test(inputValue);
+
+                        updateProducts(
+                          index,
+                          sections[index].selectedCategory?.id || null,
+                          isNumeric ? "" : inputValue,
+                          isNumeric ? inputValue : null
+                        );
                       }}
                     />
                   )}
@@ -515,8 +547,19 @@ const Page = () => {
         <div className={styles.btns}>
           <Button
             variant="contained"
+            color="warning"
+            onClick={() => {}}
+            className={styles.btnWithIcon}
+            style={{ marginLeft: "auto", marginTop: 40 }}
+          >
+            <FaPaperPlane size={22} />
+            <span>Chek (PDF)</span>
+          </Button>
+
+          <Button
+            variant="contained"
             color="secondary"
-            onClick={handleAddSection}
+            onClick={handleSubmit}
             className={styles.btnWithIcon}
             style={{ marginLeft: "auto", marginTop: 40 }}
           >
