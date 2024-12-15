@@ -36,6 +36,8 @@ const Page = () => {
     (state: RootState) => state.productCategories
   );
   const { products } = useSelector((state: RootState) => state.products);
+  const [originalProducts, setOriginalProducts] = useState<any[]>([]);
+
 
   const [sections, setSections] = useState<RentalDetails[]>([
     {
@@ -103,6 +105,7 @@ const Page = () => {
   }, [dispatch]);
 
   useEffect(() => {
+    // Загружаем оригинальные продукты при первом рендере
     dispatch(
       fetchProducts({
         pageNumber: 1,
@@ -111,7 +114,11 @@ const Page = () => {
         category_id: "null",
         searchable_title_id: "",
       })
-    );
+    ).then((response: any) => {
+      if (response.payload) {
+        setOriginalProducts(response.payload.results); // Предполагается, что данные продуктов приходят в response.payload
+      }
+    });
   }, [dispatch]);
 
   useEffect(() => {
@@ -215,31 +222,30 @@ const Page = () => {
     newSections[index].price = value.price;
     newSections[index].type = value.type;
     setSections(newSections);
-    newSections[index].dailyPrice = value.price;
   };
 
   const handleQuantityChange = (index: number, value: number) => {
     const newSections = [...sections];
     newSections[index].quantity = value;
     updateTotalPrice(index, newSections[index]);
-    updateDaylyPrice(index, newSections[index]);
+    updateDailyPrice(index, newSections[index]);
     setSections(newSections);
   };
 
   const updateTotalPrice = (index: number, section: any) => {
     if (section.selectedProduct) {
-      const totalPrice = section.selectedProduct.price * section.quantity;
+      const totalPrice = +section.price * section.quantity * section.rentalDays;
       const newSections = [...sections];
       newSections[index].totalPrice = totalPrice;
       setSections(newSections);
     }
   };
 
-  const updateDaylyPrice = (index: number, section: any) => {
+  const updateDailyPrice = (index: number, section: any) => {
     if (section.selectedProduct) {
-      const totalPrice = section.selectedProduct.price * section.quantity;
+      const dailyPrice = +section.selectedProduct.price * section.quantity;
       const newSections = [...sections];
-      newSections[index].totalPrice = totalPrice;
+      newSections[index].dailyPrice = dailyPrice;
       setSections(newSections);
     }
   };
@@ -255,8 +261,11 @@ const Page = () => {
       );
 
       newSections[index].rentalDays = rentalDays;
+    } else {
+      newSections[index].rentalDays = 1;
     }
 
+    updateTotalPrice(index, newSections[index]);
     setSections(newSections);
   };
 
@@ -273,6 +282,7 @@ const Page = () => {
       newSections[index].rentalDays = rentalDays;
     }
 
+    updateTotalPrice(index, newSections[index]);
     setSections(newSections);
   };
 
@@ -427,7 +437,7 @@ const Page = () => {
                     <TextField
                       type="number"
                       variant="outlined"
-                      value={sections[index].totalPrice}
+                      value={sections[index].dailyPrice}
                       disabled
                     />
                   </div>
