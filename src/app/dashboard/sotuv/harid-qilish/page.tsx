@@ -33,6 +33,8 @@ const Page = () => {
     (state: RootState) => state.productCategories
   );
   const { products } = useSelector((state: RootState) => state.products);
+  const [originalProducts, setOriginalProducts] = useState<any[]>([]);
+
 
   const [sections, setSections] = useState([
     {
@@ -94,6 +96,7 @@ const Page = () => {
   }, [dispatch]);
 
   useEffect(() => {
+    // Загружаем оригинальные продукты при первом рендере
     dispatch(
       fetchProducts({
         pageNumber: 1,
@@ -102,7 +105,11 @@ const Page = () => {
         category_id: "null",
         searchable_title_id: "",
       })
-    );
+    ).then((response: any) => {
+      if (response.payload) {
+        setOriginalProducts(response.payload.results); // Предполагается, что данные продуктов приходят в response.payload
+      }
+    });
   }, [dispatch]);
 
   useEffect(() => {
@@ -129,8 +136,8 @@ const Page = () => {
         dailyPrice: 0,
         price: 0,
         type: "",
-        startDate: "", // Начальная дата
-        endDate: "", // Конечная дата
+        startDate: "",
+        endDate: "",
       },
     ]);
   };
@@ -158,46 +165,61 @@ const Page = () => {
   const handleChangeProductTitle = (index: number, value: string) => {
     const newSections: any = [...sections];
     newSections[index].productTitle = value;
-    updateProducts(
-      index,
-      newSections[index].selectedCategory?.id || null,
-      value
-    );
+
+    const filteredProducts = originalProducts.filter((product) => {
+      if (/^\d+$/.test(value)) {
+        // Если ввод только цифры, ищем по searchable_title_id
+        console.log(product.searchable_title_id.includes(value));
+
+        return product.searchable_title_id.includes(value);
+      } else {
+        // Иначе ищем по названию
+        return product.title.toLowerCase().includes(value.toLowerCase());
+      }
+    });
+
+    setSections(newSections);
+    setOriginalProducts(filteredProducts);
   };
 
   const handleSelectProduct = (index: number, value: any) => {
     const newSections = [...sections];
-    newSections[index].selectedProduct = value;
-    newSections[index].dailyPrice = value.price * sections[index].quantity;
-    newSections[index].totalPrice = value.price * sections[index].quantity; ////
-    newSections[index].price = value.price;
-    newSections[index].type = value.type;
+
+    newSections[index] = {
+      ...newSections[index],
+      selectedProduct: value,
+      dailyPrice: +value.price,
+      totalPrice:
+        +value.price * sections[index].quantity * sections[index].rentalDays,
+      price: value.price,
+      type: value.type,
+    };
+
     setSections(newSections);
-    newSections[index].dailyPrice = value.price;
   };
 
   const handleQuantityChange = (index: number, value: number) => {
     const newSections = [...sections];
     newSections[index].quantity = value;
     updateTotalPrice(index, newSections[index]);
-    updateDaylyPrice(index, newSections[index]);
+    updateDailyPrice(index, newSections[index]);
     setSections(newSections);
   };
 
   const updateTotalPrice = (index: number, section: any) => {
     if (section.selectedProduct) {
-      const totalPrice = section.selectedProduct.price * section.quantity;
+      const totalPrice = +section.price * section.quantity * section.rentalDays;
       const newSections = [...sections];
       newSections[index].totalPrice = totalPrice;
       setSections(newSections);
     }
   };
 
-  const updateDaylyPrice = (index: number, section: any) => {
+  const updateDailyPrice = (index: number, section: any) => {
     if (section.selectedProduct) {
-      const totalPrice = section.selectedProduct.price * section.quantity;
+      const dailyPrice = +section.selectedProduct.price * section.quantity;
       const newSections = [...sections];
-      newSections[index].totalPrice = totalPrice;
+      newSections[index].dailyPrice = dailyPrice;
       setSections(newSections);
     }
   };
@@ -206,34 +228,44 @@ const Page = () => {
     newSections[index].startDate = date;
 
     if (newSections[index].endDate) {
-      const startDate = new Date(date); // The start date is coming from the TextField value
-      const endDate = new Date(newSections[index].endDate); // The end date is from the section
-      const rentalDays = Math.ceil(
-        (endDate.getTime() - startDate.getTime()) / (1000 * 3600 * 24)
-      ); // Correctly calculate the number of days
-
+      const startDate = new Date(date);
+      const endDate = new Date(newSections[index].endDate);
+      const rentalDays = Math.max(
+        1,
+        Math.ceil(
+          (endDate.getTime() - startDate.getTime()) / (1000 * 3600 * 24)
+        )
+      );
       newSections[index].rentalDays = rentalDays;
+    } else {
+      newSections[index].rentalDays = 1;
     }
 
+    updateTotalPrice(index, newSections[index]);
     setSections(newSections);
   };
 
   const handleEndDateChange = (index: number, date: string) => {
     const newSections = [...sections];
     newSections[index].endDate = date;
-    if (newSections[index].startDate) {
-      const startDate = new Date(newSections[index].startDate); // Start date from section
-      const endDate = new Date(date); // End date from user input (or wherever `date` comes from)
-      const rentalDays = Math.ceil(
-        (endDate.getTime() - startDate.getTime()) / (1000 * 3600 * 24)
-      ); // Calculate rental days in full days
 
-      newSections[index].rentalDays = rentalDays; // Update rentalDays in the section
+    if (newSections[index].startDate) {
+      const startDate = new Date(newSections[index].startDate);
+      const endDate = new Date(date);
+      const rentalDays = Math.max(
+        1,
+        Math.ceil(
+          (endDate.getTime() - startDate.getTime()) / (1000 * 3600 * 24)
+        )
+      );
+      newSections[index].rentalDays = rentalDays;
+    } else {
+      newSections[index].rentalDays = 1; // Если дата начала не задана
     }
 
+    updateTotalPrice(index, newSections[index]);
     setSections(newSections);
   };
-  console.log(sections);
 
   const handleCarSelect = (car: any) => {
     setSelectedCar(car); // Обновляем выбранную машину
@@ -332,9 +364,10 @@ const Page = () => {
                       {...params}
                       label="Mahsulot"
                       variant="outlined"
-                      onChange={(e) =>
-                        handleChangeProductTitle(index, e.target.value)
-                      }
+                      onChange={(e) => {
+                        const inputValue = e.target.value;
+                        handleChangeProductTitle(index, inputValue);
+                      }}
                     />
                   )}
                 />
@@ -372,7 +405,7 @@ const Page = () => {
                     <TextField
                       type="number"
                       variant="outlined"
-                      value={sections[index].totalPrice}
+                      value={sections[index].dailyPrice}
                       disabled
                     />
                   </div>
