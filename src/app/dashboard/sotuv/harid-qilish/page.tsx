@@ -1,5 +1,5 @@
 "use client";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import styles from "./styles.module.scss";
 import Title from "@/components/Title/Title";
 import { Autocomplete, TextField, Button } from "@mui/material";
@@ -19,10 +19,13 @@ import {
 } from "react-icons/fa";
 import { fetchCarServices } from "@/features/cars/cars";
 import axiosInstance from "@/utils/axiosInstance";
-import { RentalDetails } from "../../../../../types";
+import { DeliveryDetails, RentalDetails } from "../../../../../types";
+import { useReactToPrint } from "react-to-print";
 
 const Page = () => {
   const dispatch = useDispatch<AppDispatch>();
+  const chackRef = useRef(null);
+  const reactToPrintFn = useReactToPrint({ contentRef: chackRef });
 
   const {
     users,
@@ -37,7 +40,6 @@ const Page = () => {
   );
   const { products } = useSelector((state: RootState) => state.products);
   const [originalProducts, setOriginalProducts] = useState<any[]>([]);
-
 
   const [sections, setSections] = useState<RentalDetails[]>([
     {
@@ -58,8 +60,12 @@ const Page = () => {
   const { carServices, status, error } = useSelector(
     (state: RootState) => state.carServices
   );
-  const [selectedCar, setSelectedCar] = useState<any>(null);
-  const [driverComment, setDriverComment] = useState("");
+  const [delivery, setDelivery] = useState<DeliveryDetails[]>([
+    {
+      comment: "",
+      price: "",
+    },
+  ]);
   const [autocompleteProducts, setAutocompleteProducts] = useState(products);
   const [titleOrId, setTitleOrId] = useState("");
 
@@ -174,7 +180,7 @@ const Page = () => {
   const handleSubmit = async () => {
     const requestData = {
       user_id: selectedUser?.id || "",
-      daily_price: sections[0]?.dailyPrice || "0",
+      daily_price: sections[0]?.dailyPrice.toString() || "0",
       total_price: sections
         .reduce((acc, section) => acc + section.totalPrice, 0)
         .toString(),
@@ -191,8 +197,8 @@ const Page = () => {
       service_car: selectedCar
         ? [
             {
-              price: selectedCar?.price || "0",
-              comment: driverComment || "",
+              price: delivery[0].price || "0",
+              comment: delivery[0].comment || "",
             },
           ]
         : [],
@@ -201,7 +207,6 @@ const Page = () => {
     try {
       const response = await axiosInstance.post("/order/create", requestData);
       console.log("Успешный ответ:", response.data);
-      alert("Данные успешно отправлены");
     } catch (error: any) {
       console.error("Ошибка при отправке данных:", error);
       alert(
@@ -301,200 +306,215 @@ const Page = () => {
       </div>
 
       <div className={styles.content}>
-        <div className={styles.section}>
-          <h4 className={styles.title}>
-            Foydalanuvchi tanlash <FaUser size={19} />
-          </h4>
-          <Autocomplete
-            className={styles.autocomplete}
-            id="user-selection-autocomplete"
-            size="small"
-            options={users}
-            onChange={(event, value) => setSelectedUser(value)}
-            getOptionLabel={(option: any) =>
-              `${option.name || "Без имени"} (${
-                option.phone || "Нет телефона"
-              })`
-            }
-            isOptionEqualToValue={(option, value) =>
-              option.phone === value.phone
-            }
-            renderInput={(params) => (
-              <TextField
-                {...params}
-                label="Telefon nomer"
-                variant="outlined"
-                onChange={(e) => setPhone(e.target.value)}
-              />
-            )}
-          />
-          {selectedUser && (
-            <div>
-              <h5>Tanlangan foydalanuvchi</h5>
-              <p>Ism: {selectedUser.name}</p>
-              <p>Telefon: {selectedUser.phone}</p>
-            </div>
-          )}
-        </div>
-
-        {sections.map((section, index) => (
-          <div key={index} className={styles.product}>
-            <h2>
-              {index + 1}-Mahsulot <FaBox size={19} />
-            </h2>
-            <div className={styles.productRow}>
-              <div className={styles.left}>
-                <h4 className={styles.title}>
-                  Mahsulot kategoriyasini tanlash
-                </h4>
-                <Autocomplete
-                  className={styles.autocomplete}
+        <div className={styles.rowDiv}>
+          <div className={styles.userSection}>
+            <h4 className={styles.numberOfProduct}>
+              Foydalanuvchi tanlash <FaUser size={19} />
+            </h4>
+            <Autocomplete
+              className={styles.autocomplete}
+              id="user-selection-autocomplete"
+              size="small"
+              options={users}
+              onChange={(event, value) => setSelectedUser(value)}
+              getOptionLabel={(option: any) =>
+                `${option.name || "Без имени"} (${
+                  option.phone || "Нет телефона"
+                })`
+              }
+              isOptionEqualToValue={(option, value) =>
+                option.phone === value.phone
+              }
+              renderInput={(params) => (
+                <TextField
+                  {...params}
                   size="small"
-                  options={categories}
-                  onChange={(event, value) =>
-                    handleChangeCategory(index, value)
-                  }
-                  getOptionLabel={(option) => option.title || "Без названия"}
-                  isOptionEqualToValue={(option, value) =>
-                    option.id === value.id
-                  }
-                  renderInput={(params) => (
-                    <TextField
-                      {...params}
-                      label="Kategoriya"
-                      variant="outlined"
-                    />
-                  )}
+                  label="Telefon nomer"
+                  variant="outlined"
+                  onChange={(e) => setPhone(e.target.value)}
                 />
-              </div>
-              <div className={styles.right}>
-                <h4 className={styles.title}>Mahsulotni tanlash</h4>
-                <Autocomplete
-                  className={styles.autocomplete}
-                  size="small"
-                  options={autocompleteProducts}
-                  onChange={(event, value) => handleSelectProduct(index, value)}
-                  getOptionLabel={(option: any) =>
-                    option.title + " (" + option.searchable_title_id + ")" ||
-                    "Без названия"
-                  }
-                  clearIcon={false}
-                  isOptionEqualToValue={(option, value) =>
-                    option.id === value.id
-                  }
-                  renderInput={(params) => (
-                    <TextField
-                      {...params}
-                      value={titleOrId}
-                      label="Product"
-                      variant="outlined"
-                      onChange={(e) => {
-                        const inputValue = e.target.value;
-                        setTitleOrId(inputValue);
-                        const isNumeric = /^\d+$/.test(inputValue);
-
-                        updateProducts(
-                          index,
-                          sections[index].selectedCategory?.id || null,
-                          isNumeric ? "" : inputValue,
-                          isNumeric ? inputValue : null
-                        );
-                      }}
-                    />
-                  )}
-                />
-              </div>
-            </div>
-
-            {section.selectedProduct && (
-              <>
-                <div className={styles.productRow}>
-                  <div className={styles.left}>
-                    <h4 className={styles.title}>{section.type + " Narxi"}</h4>
-                    <TextField
-                      type="number"
-                      variant="outlined"
-                      value={section.price}
-                      disabled
-                    />
-                  </div>
-                  <div className={styles.right}>
-                    <h4 className={styles.title}>Arenda olish miqdori</h4>
-                    <TextField
-                      type="number"
-                      variant="outlined"
-                      value={section.quantity}
-                      onChange={(e) =>
-                        handleQuantityChange(index, +e.target.value)
-                      }
-                    />
-                  </div>
-                </div>
-
-                <div className={styles.productRow}>
-                  <div className={styles.left}>
-                    <h4 className={styles.title}>Arenda kunlik narxi</h4>
-                    <TextField
-                      type="number"
-                      variant="outlined"
-                      value={sections[index].dailyPrice}
-                      disabled
-                    />
-                  </div>
-                  <div className={styles.right}>
-                    <h4 className={styles.title}>Arenda boshlanishi</h4>
-                    <TextField
-                      type="date"
-                      variant="outlined"
-                      value={section.startDate}
-                      onChange={(e) =>
-                        handleStartDateChange(index, e.target.value)
-                      }
-                    />
-                  </div>
-                </div>
-
-                <div className={styles.productRow}>
-                  <div className={styles.left}>
-                    <h4 className={styles.title}>Arenda Umumiy narxi</h4>
-                    <TextField
-                      type="number"
-                      variant="outlined"
-                      value={sections[index].totalPrice}
-                      disabled
-                    />
-                  </div>
-                  <div className={styles.right}>
-                    <h4 className={styles.title}>Arenda tugashi</h4>
-                    <TextField
-                      type="date"
-                      variant="outlined"
-                      value={section.endDate}
-                      onChange={(e) =>
-                        handleEndDateChange(index, e.target.value)
-                      }
-                    />
-                  </div>
-                </div>
-              </>
-            )}
-
-            <div className={styles.productRow}>
-              {index !== 0 && (
-                <Button
-                  className={styles.del}
-                  size="small"
-                  variant="contained"
-                  color="error"
-                  onClick={() => handleRemoveSection(index)}
-                  style={{ marginLeft: "auto" }}
-                >
-                  <FaTrash size={19} />
-                </Button>
               )}
-            </div>
+            />
+            {selectedUser && (
+              <div>
+                <h5>Tanlangan foydalanuvchi</h5>
+                <p>Ism: {selectedUser.name}</p>
+                <p>Telefon: {selectedUser.phone}</p>
+              </div>
+            )}
           </div>
-        ))}
+
+          {sections.map((section, index) => (
+            <div key={index} className={styles.product}>
+              <h2 className={styles.numberOfProduct}>
+                {index + 1}-Mahsulot <FaBox size={19} />
+              </h2>
+              <div className={styles.productRow}>
+                <div className={styles.left}>
+                  <h4 className={styles.title}>Mahsulot kategoriyasini</h4>
+                  <Autocomplete
+                    className={styles.autocomplete}
+                    size="small"
+                    options={categories}
+                    onChange={(event, value) =>
+                      handleChangeCategory(index, value)
+                    }
+                    getOptionLabel={(option) => option.title || "Без названия"}
+                    isOptionEqualToValue={(option, value) =>
+                      option.id === value.id
+                    }
+                    renderInput={(params) => (
+                      <TextField
+                        {...params}
+                        size="small"
+                        label="Kategoriya"
+                        variant="outlined"
+                      />
+                    )}
+                  />
+                </div>
+                <div className={styles.right}>
+                  <h4 className={styles.title}>Mahsulotni tanlash</h4>
+                  <Autocomplete
+                    className={styles.autocomplete}
+                    size="small"
+                    options={autocompleteProducts}
+                    onChange={(event, value) =>
+                      handleSelectProduct(index, value)
+                    }
+                    getOptionLabel={(option: any) =>
+                      option.title + " (" + option.searchable_title_id + ")" ||
+                      "Без названия"
+                    }
+                    clearIcon={false}
+                    isOptionEqualToValue={(option, value) =>
+                      option.id === value.id
+                    }
+                    renderInput={(params) => (
+                      <TextField
+                        {...params}
+                        size="small"
+                        value={titleOrId}
+                        label="Product"
+                        variant="outlined"
+                        onChange={(e) => {
+                          const inputValue = e.target.value;
+                          setTitleOrId(inputValue);
+                          const isNumeric = /^\d+$/.test(inputValue);
+
+                          updateProducts(
+                            index,
+                            sections[index].selectedCategory?.id || null,
+                            isNumeric ? "" : inputValue,
+                            isNumeric ? inputValue : null
+                          );
+                        }}
+                      />
+                    )}
+                  />
+                </div>
+              </div>
+
+              {section.selectedProduct && (
+                <>
+                  <div className={styles.productRow}>
+                    <div className={styles.left}>
+                      <h4 className={styles.title}>
+                        {section.type + " Narxi"}
+                      </h4>
+                      <TextField
+                        size="small"
+                        type="number"
+                        variant="outlined"
+                        value={section.price}
+                        disabled
+                      />
+                    </div>
+                    <div className={styles.right}>
+                      <h4 className={styles.title}>Arenda olish miqdori</h4>
+                      <TextField
+                        size="small"
+                        type="number"
+                        variant="outlined"
+                        value={section.quantity}
+                        onChange={(e) =>
+                          handleQuantityChange(index, +e.target.value)
+                        }
+                      />
+                    </div>
+                  </div>
+
+                  <div className={styles.productRow}>
+                    <div className={styles.left}>
+                      <h4 className={styles.title}>Arenda kunlik narxi</h4>
+                      <TextField
+                        size="small"
+                        type="number"
+                        variant="outlined"
+                        value={sections[index].dailyPrice}
+                        disabled
+                      />
+                    </div>
+                    <div className={styles.right}>
+                      <h4 className={styles.title}>Arenda boshlanishi</h4>
+                      <TextField
+                        size="small"
+                        type="date"
+                        className={styles.dateInput}
+                        variant="outlined"
+                        value={section.startDate}
+                        onChange={(e) =>
+                          handleStartDateChange(index, e.target.value)
+                        }
+                      />
+                    </div>
+                  </div>
+
+                  <div className={styles.productRow}>
+                    <div className={styles.left}>
+                      <h4 className={styles.title}>Arenda Umumiy narxi</h4>
+                      <TextField
+                        size="small"
+                        type="number"
+                        variant="outlined"
+                        value={sections[index].totalPrice}
+                        disabled
+                      />
+                    </div>
+                    <div className={styles.right}>
+                      <h4 className={styles.title}>Arenda tugashi</h4>
+                      <TextField
+                        size="small"
+                        type="date"
+                        className={styles.dateInput}
+                        variant="outlined"
+                        value={section.endDate}
+                        onChange={(e) =>
+                          handleEndDateChange(index, e.target.value)
+                        }
+                      />
+                    </div>
+                  </div>
+                </>
+              )}
+
+              <div className={styles.productRow}>
+                {index !== 0 && (
+                  <Button
+                    className={styles.del}
+                    size="small"
+                    variant="contained"
+                    color="error"
+                    onClick={() => handleRemoveSection(index)}
+                    style={{ marginLeft: "auto" }}
+                  >
+                    <FaTrash size={19} />
+                  </Button>
+                )}
+              </div>
+            </div>
+          ))}
+        </div>
         <Button
           className={styles.btnWithIcon}
           style={{ marginLeft: "auto" }}
@@ -505,11 +525,10 @@ const Page = () => {
           <FaPlus size={22} />
           <span>Mahsulot</span>
         </Button>
+
         <div className={styles.carRow}>
           <div className={styles.carLeft}>
-            <h4 className={styles.title}>
-              Tanlang mashina <FaCar size={19} />
-            </h4>
+            <h4 className={styles.title}>Tanlang mashina</h4>
             <Autocomplete
               className={styles.autocomplete}
               id="car-selection-autocomplete"
@@ -521,22 +540,28 @@ const Page = () => {
               }
               isOptionEqualToValue={(option, value) => option.id === value.id}
               renderInput={(params) => (
-                <TextField {...params} label="Mashina" variant="outlined" />
+                <TextField
+                  {...params}
+                  size="small"
+                  label="Mashina"
+                  variant="outlined"
+                />
               )}
             />
-
-            {selectedCar && (
-              <div>
-                <h5>Tanlangan mashina</h5>
-                <p>Nom: {selectedCar.comment}</p>
-              </div>
-            )}
+            <TextField
+              size="small"
+              variant="outlined"
+              label="Kommentariya"
+              value={driverComment}
+              onChange={handleCommentChange}
+            />
           </div>
 
           {/* Комментарий для водителя */}
           <div className={styles.carRight}>
             <h4 className={styles.title}>Kommentariya uchun</h4>
             <TextField
+              size="small"
               variant="outlined"
               label="Kommentariya"
               value={driverComment}
@@ -548,7 +573,9 @@ const Page = () => {
           <Button
             variant="contained"
             color="warning"
-            onClick={() => {}}
+            onClick={() => {
+              reactToPrintFn();
+            }}
             className={styles.btnWithIcon}
             style={{ marginLeft: "auto", marginTop: 40 }}
           >
@@ -561,11 +588,58 @@ const Page = () => {
             color="secondary"
             onClick={handleSubmit}
             className={styles.btnWithIcon}
-            style={{ marginLeft: "auto", marginTop: 40 }}
+            style={{ marginLeft: 20, marginTop: 40 }}
           >
             <FaCartPlus size={22} />
             <span>Sotish</span>
           </Button>
+        </div>
+        <div ref={chackRef} className={styles.chechDiv}>
+          {selectedUser && (
+            <>
+              {" "}
+              <div>
+                <strong>Foydalanuvchi: </strong>
+                <span>
+                  {selectedUser.first_name} {selectedUser.name}{" "}
+                  {selectedUser.last_name}
+                </span>
+              </div>
+              <div>
+                <strong>Foydalanuvchi Telefoni: </strong>
+                <span>{selectedUser.phone}</span>
+              </div>
+              <div>
+                <strong>Maxsulotlar: </strong>
+                <ul>
+                  {sections.length > 0 &&
+                    sections.map((el: any, i) => {
+                      return (
+                        <>
+                          {el.selectedProduct && (
+                            <li key={el.id}>
+                              <div>
+                                <strong>{i + 1}-maxsulot: </strong>
+                                <span>
+                                  {el.selectedProduct.title}(
+                                  {el.selectedProduct.searchable_title_id})
+                                </span>
+                              </div>
+                              <div>
+                                <strong>
+                                  1 {el.selectedProduct.type} narxi:
+                                </strong>
+                                <span> {el.selectedProduct.price} so'm</span>
+                              </div>
+                            </li>
+                          )}
+                        </>
+                      );
+                    })}
+                </ul>
+              </div>
+            </>
+          )}
         </div>
       </div>
     </div>

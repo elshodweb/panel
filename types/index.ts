@@ -16,3 +16,8 @@ export type RentalDetails = {
   startDate: string;
   endDate: string;
 };
+
+export type DeliveryDetails = {
+  price: string;
+  comment: string;
+};
