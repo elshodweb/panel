@@ -27,37 +27,43 @@
 }
 
 .content {
-  padding-left: 10%;
-  padding-right: 10%;
   margin-top: 80px;
-  max-width: 1200px; /* Устанавливаем максимальную ширину */
-  width: 100%;
   margin-left: auto;
   margin-right: auto;
 }
 
-.section {
+.rowDiv {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 40px;
+}
+.userSection {
   border: 1px solid #e1e1e1;
   padding: 10px;
   border-radius: 10px;
-  margin-bottom: 10px;
-  max-width: 900px;
+  width: 100%;
+  max-width: 500px;
   background-color: #fff;
 }
-
 .product {
-  max-width: 900px;
   background-color: #fff;
   padding: 10px;
   border: 1px solid #ddd; /* Светлее бордер для лучшего контраста */
   border-radius: 10px;
-  margin-bottom: 20px;
-}
 
+  width: 100%;
+  max-width: 500px;
+  flex: 1 1 auto;
+}
+.numberOfProduct {
+  margin: 0;
+  margin-bottom: 10px;
+  font-size: 20px;
+}
 .title {
   margin: 0;
   margin-bottom: 10px;
-  margin-top: 10px;
   padding: 0;
   text-transform: capitalize;
 }
@@ -115,14 +121,27 @@
   background-color: #0056b3;
   color: white;
 }
-.carRow {
-  display: flex;
+.car {
+  max-width: 500px;
+  background-color: #fff;
   border: 1px solid #e1e1e1;
   padding: 10px;
+  width: 100%;
   border-radius: 10px;
-  margin: 10px 0;
-  max-width: 900px;
-  background-color: #fff;
+}
+.carRow {
+  display: flex;
+  gap: 10px;
+  & + & {
+    margin-top: 10px;
+  }
+}
+.cars {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 20px;
+  margin-top: 30px;
 }
 .carLeft {
   width: 50%;
@@ -141,6 +160,11 @@
   justify-content: space-between;
   align-items: center;
 }
+.chechDiv {
+  overflow: hidden;
+  transform: translate(-1000px, 0);
+}
+
 @media (max-width: 768px) {
   .content {
     padding-left: 5%;
