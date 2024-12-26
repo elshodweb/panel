@@ -157,9 +157,25 @@ const Page = () => {
     ]);
   };
 
+  const handleAddDelivery = () => {
+    setDelivery((prev) => [
+      ...prev,
+      {
+        comment: "",
+        price: "",
+      },
+    ]);
+  };
+
   const handleRemoveSection = (index: number) => {
     if (sections.length > 1) {
       setSections((prev) => prev.filter((_, i) => i !== index));
+    }
+  };
+
+  const handleRemoveDelivery = (index: number) => {
+    if (delivery.length > 1) {
+      setDelivery((prev) => prev.filter((_, i) => i !== index));
     }
   };
 
@@ -194,14 +210,7 @@ const Page = () => {
         given_date: section.startDate,
         end_date: section.endDate,
       })),
-      service_car: selectedCar
-        ? [
-            {
-              price: delivery[0].price || "0",
-              comment: delivery[0].comment || "",
-            },
-          ]
-        : [],
+      service_car: delivery.length ? delivery : [],
     };
 
     try {
@@ -291,12 +300,16 @@ const Page = () => {
     setSections(newSections);
   };
 
-  const handleCarSelect = (car: any) => {
-    setSelectedCar(car);
-  };
-
-  const handleCommentChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setDriverComment(e.target.value);
+  const changeDelivery = (
+    index: number,
+    key: keyof DeliveryDetails,
+    value: string
+  ) => {
+    setDelivery((prevDelivery) =>
+      prevDelivery.map((item, i) =>
+        i === index ? { ...item, [key]: value } : item
+      )
+    );
   };
 
   return (
@@ -526,49 +539,65 @@ const Page = () => {
           <span>Mahsulot</span>
         </Button>
 
-        <div className={styles.carRow}>
-          <div className={styles.carLeft}>
-            <h4 className={styles.title}>Tanlang mashina</h4>
-            <Autocomplete
-              className={styles.autocomplete}
-              id="car-selection-autocomplete"
-              size="small"
-              options={carServices}
-              onChange={(event, value) => handleCarSelect(value)}
-              getOptionLabel={(option: any) =>
-                `${option.comment || "Без названия"}`
-              }
-              isOptionEqualToValue={(option, value) => option.id === value.id}
-              renderInput={(params) => (
-                <TextField
-                  {...params}
-                  size="small"
-                  label="Mashina"
-                  variant="outlined"
-                />
-              )}
-            />
-            <TextField
-              size="small"
-              variant="outlined"
-              label="Kommentariya"
-              value={driverComment}
-              onChange={handleCommentChange}
-            />
-          </div>
+        <div className={styles.cars}>
+          {delivery.map((el, i) => (
+            <div key={i} className={styles.car}>
+              <h2 className={styles.numberOfProduct}>
+                {i + 1}-Mashina <FaCar size={19} />
+              </h2>
+              <div className={styles.carRow}>
+                <div className={styles.carLeft}>
+                  <h4 className={styles.title}>Mashina narxi</h4>
+                  <TextField
+                    size="small"
+                    variant="outlined"
+                    label="Narhi"
+                    value={el.price}
+                    onChange={(e) => changeDelivery(i, "price", e.target.value)}
+                  />
+                </div>
 
-          {/* Комментарий для водителя */}
-          <div className={styles.carRight}>
-            <h4 className={styles.title}>Kommentariya uchun</h4>
-            <TextField
-              size="small"
-              variant="outlined"
-              label="Kommentariya"
-              value={driverComment}
-              onChange={handleCommentChange}
-            />
-          </div>
+                <div className={styles.carRight}>
+                  <h4 className={styles.title}>Kommentariya</h4>
+                  <TextField
+                    size="small"
+                    variant="outlined"
+                    label="Kommentariya"
+                    value={el.comment}
+                    onChange={(e) =>
+                      changeDelivery(i, "comment", e.target.value)
+                    }
+                  />
+                </div>
+              </div>
+              <div className={styles.carRow}>
+                {i !== 0 && (
+                  <Button
+                    className={styles.del}
+                    size="small"
+                    variant="contained"
+                    color="error"
+                    onClick={() => handleRemoveDelivery(i)}
+                    style={{ marginLeft: "auto" }}
+                  >
+                    <FaTrash size={19} />
+                  </Button>
+                )}
+              </div>
+            </div>
+          ))}
         </div>
+
+        <Button
+          className={styles.btnWithIcon}
+          style={{ marginLeft: "auto" }}
+          variant="contained"
+          color="primary"
+          onClick={handleAddDelivery}
+        >
+          <FaPlus size={22} />
+          <span>Mashina</span>
+        </Button>
         <div className={styles.btns}>
           <Button
             variant="contained"

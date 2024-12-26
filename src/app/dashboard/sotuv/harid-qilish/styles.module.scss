@@ -35,7 +35,7 @@
 .rowDiv {
   display: flex;
   flex-wrap: wrap;
-  gap: 20px;
+  gap: 10px;
   margin-bottom: 40px;
 }
 .userSection {
@@ -59,7 +59,7 @@
 .numberOfProduct {
   margin: 0;
   margin-bottom: 10px;
-  font-size: 22px;
+  font-size: 20px;
 }
 .title {
   margin: 0;
@@ -121,15 +121,27 @@
   background-color: #0056b3;
   color: white;
 }
-.carRow {
-  display: flex;
-  border: 1px solid #e1e1e1;
-  padding: 10px;
-  border-radius: 10px;
-  display: flex;
-  gap: 10px;
+.car {
   max-width: 500px;
   background-color: #fff;
+  border: 1px solid #e1e1e1;
+  padding: 10px;
+  width: 100%;
+  border-radius: 10px;
+}
+.carRow {
+  display: flex;
+  gap: 10px;
+  & + & {
+    margin-top: 10px;
+  }
+}
+.cars {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 20px;
+  margin-top: 30px;
 }
 .carLeft {
   width: 50%;
