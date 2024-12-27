@@ -315,8 +315,8 @@ const DebtPage = () => {
                   label="User"
                   required
                 >
-                  {users.map((user) => (
-                    <MenuItem key={user.id} value={user.id}>
+                  {users.map((user,i) => (
+                    <MenuItem key={i} value={user.id}>
                       {user.first_name} {user.name} ({user.phone})
                     </MenuItem>
                   ))}

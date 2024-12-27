@@ -206,8 +206,8 @@ const OrdersPage = () => {
               required
             >
               {/* <MenuItem value={"null"}>Olib tashlash</MenuItem> */}
-              {users.map((user) => (
-                <MenuItem key={user.id} value={user.id}>
+              {users.map((user,i) => (
+                <MenuItem key={i} value={user.id}>
                   {user.name}
                 </MenuItem>
               ))}

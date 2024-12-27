@@ -646,7 +646,7 @@ const Page = () => {
                       return (
                         <>
                           {el.selectedProduct && (
-                            <li key={el.id}>
+                            <li key={i}>
                               <div>
                                 <strong>{i + 1}-maxsulot: </strong>
                                 <span>

@@ -49,7 +49,7 @@
 .product {
   background-color: #fff;
   padding: 10px;
-  border: 1px solid #ddd; /* Светлее бордер для лучшего контраста */
+  border: 1px solid #ddd; 
   border-radius: 10px;
 
   width: 100%;
@@ -71,13 +71,13 @@
 .productRow {
   display: flex;
   justify-content: space-between;
-  gap: 15px; /* Увеличен зазор между колонками */
+  gap: 15px; 
   margin-bottom: 10px;
 }
 
 .left,
 .right {
-  width: 48%; /* Немного уменьшено, чтобы было пространство между */
+  width: 48%; 
 }
 
 .del {
