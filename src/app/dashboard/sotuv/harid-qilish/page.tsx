@@ -21,11 +21,22 @@ import { fetchCarServices } from "@/features/cars/cars";
 import axiosInstance from "@/utils/axiosInstance";
 import { DeliveryDetails, RentalDetails } from "../../../../../types";
 import { useReactToPrint } from "react-to-print";
+import UserDataSummary from "@/components/Check/Check";
 
 const Page = () => {
   const dispatch = useDispatch<AppDispatch>();
   const chackRef = useRef(null);
-  const reactToPrintFn = useReactToPrint({ contentRef: chackRef });
+  const reactToPrintFn = useReactToPrint({
+    contentRef: chackRef, // Use contentRef in the newer version
+    onAfterPrint: () => setIsCheckVisible(false), // Hide after printing
+  });
+
+  const handlePrint = () => {
+    setIsCheckVisible(true); // Show the receipt before printing
+    setTimeout(() => {
+      reactToPrintFn(); // Trigger the print function
+    }, 100); // Ensure the state is updated before printing
+  };
 
   const {
     users,
@@ -34,7 +45,7 @@ const Page = () => {
   } = useSelector((state: RootState) => state.users);
   const [selectedUser, setSelectedUser] = useState<any>(null);
   const [phone, setPhone] = useState("");
-
+  const [isCheckVisible, setIsCheckVisible] = useState(false);
   const { categories } = useSelector(
     (state: RootState) => state.productCategories
   );
@@ -174,7 +185,7 @@ const Page = () => {
   };
 
   const handleRemoveDelivery = (index: number) => {
-    if (delivery.length > 1) {
+    if (delivery.length > 0) {
       setDelivery((prev) => prev.filter((_, i) => i !== index));
     }
   };
@@ -193,7 +204,9 @@ const Page = () => {
     updateProducts(index, value?.id, newSections[index].productTitle);
   };
 
-  const handleSubmit = async () => {
+  const handleSubmit = async (e: any) => {
+    e.preventDefault();
+    if (isCheckVisible) return; // Prevent double submission
     const requestData = {
       user_id: selectedUser?.id || "",
       daily_price: sections[0]?.dailyPrice.toString() || "0",
@@ -207,8 +220,8 @@ const Page = () => {
         quantity_sold: section.quantity.toString(),
         price_per_day: section.dailyPrice.toString(),
         unused_days: "0",
-        given_date: section.startDate,
-        end_date: section.endDate,
+        ...(section.startDate.length ? { given_date: section.startDate } : {}),
+        ...(section.endDate.length ? { end_date: section.endDate } : {}),
       })),
       service_car: delivery.length ? delivery : [],
     };
@@ -313,7 +326,7 @@ const Page = () => {
   };
 
   return (
-    <div className={styles.wrapper}>
+    <form onSubmit={handleSubmit} className={styles.wrapper}>
       <div className={styles.row}>
         <Title>Harid qilish</Title>
       </div>
@@ -340,6 +353,7 @@ const Page = () => {
               }
               renderInput={(params) => (
                 <TextField
+                  required
                   {...params}
                   size="small"
                   label="Telefon nomer"
@@ -405,6 +419,7 @@ const Page = () => {
                     }
                     renderInput={(params) => (
                       <TextField
+                        required
                         {...params}
                         size="small"
                         value={titleOrId}
@@ -436,6 +451,7 @@ const Page = () => {
                         {section.type + " Narxi"}
                       </h4>
                       <TextField
+                        required
                         size="small"
                         type="number"
                         variant="outlined"
@@ -446,6 +462,7 @@ const Page = () => {
                     <div className={styles.right}>
                       <h4 className={styles.title}>Arenda olish miqdori</h4>
                       <TextField
+                        required
                         size="small"
                         type="number"
                         variant="outlined"
@@ -461,6 +478,7 @@ const Page = () => {
                     <div className={styles.left}>
                       <h4 className={styles.title}>Arenda kunlik narxi</h4>
                       <TextField
+                        required
                         size="small"
                         type="number"
                         variant="outlined"
@@ -471,6 +489,7 @@ const Page = () => {
                     <div className={styles.right}>
                       <h4 className={styles.title}>Arenda boshlanishi</h4>
                       <TextField
+                        required
                         size="small"
                         type="date"
                         className={styles.dateInput}
@@ -487,6 +506,7 @@ const Page = () => {
                     <div className={styles.left}>
                       <h4 className={styles.title}>Arenda Umumiy narxi</h4>
                       <TextField
+                        required
                         size="small"
                         type="number"
                         variant="outlined"
@@ -497,6 +517,7 @@ const Page = () => {
                     <div className={styles.right}>
                       <h4 className={styles.title}>Arenda tugashi</h4>
                       <TextField
+                        required
                         size="small"
                         type="date"
                         className={styles.dateInput}
@@ -538,7 +559,6 @@ const Page = () => {
           <FaPlus size={22} />
           <span>Mahsulot</span>
         </Button>
-
         <div className={styles.cars}>
           {delivery.map((el, i) => (
             <div key={i} className={styles.car}>
@@ -549,6 +569,7 @@ const Page = () => {
                 <div className={styles.carLeft}>
                   <h4 className={styles.title}>Mashina narxi</h4>
                   <TextField
+                    required
                     size="small"
                     variant="outlined"
                     label="Narhi"
@@ -560,6 +581,7 @@ const Page = () => {
                 <div className={styles.carRight}>
                   <h4 className={styles.title}>Kommentariya</h4>
                   <TextField
+                    required
                     size="small"
                     variant="outlined"
                     label="Kommentariya"
@@ -571,7 +593,7 @@ const Page = () => {
                 </div>
               </div>
               <div className={styles.carRow}>
-                {i !== 0 && (
+                {
                   <Button
                     className={styles.del}
                     size="small"
@@ -582,12 +604,11 @@ const Page = () => {
                   >
                     <FaTrash size={19} />
                   </Button>
-                )}
+                }
               </div>
             </div>
           ))}
         </div>
-
         <Button
           className={styles.btnWithIcon}
           style={{ marginLeft: "auto" }}
@@ -603,9 +624,11 @@ const Page = () => {
             variant="contained"
             color="warning"
             onClick={() => {
-              reactToPrintFn();
+              handlePrint();
             }}
+            
             className={styles.btnWithIcon}
+            type="button"
             style={{ marginLeft: "auto", marginTop: 40 }}
           >
             <FaPaperPlane size={22} />
@@ -615,7 +638,7 @@ const Page = () => {
           <Button
             variant="contained"
             color="secondary"
-            onClick={handleSubmit}
+            type="submit"
             className={styles.btnWithIcon}
             style={{ marginLeft: 20, marginTop: 40 }}
           >
@@ -623,55 +646,44 @@ const Page = () => {
             <span>Sotish</span>
           </Button>
         </div>
-        <div ref={chackRef} className={styles.chechDiv}>
-          {selectedUser && (
-            <>
-              {" "}
-              <div>
-                <strong>Foydalanuvchi: </strong>
-                <span>
-                  {selectedUser.first_name} {selectedUser.name}{" "}
-                  {selectedUser.last_name}
-                </span>
-              </div>
-              <div>
-                <strong>Foydalanuvchi Telefoni: </strong>
-                <span>{selectedUser.phone}</span>
-              </div>
-              <div>
-                <strong>Maxsulotlar: </strong>
-                <ul>
-                  {sections.length > 0 &&
-                    sections.map((el: any, i) => {
-                      return (
-                        <>
-                          {el.selectedProduct && (
-                            <li key={i}>
-                              <div>
-                                <strong>{i + 1}-maxsulot: </strong>
-                                <span>
-                                  {el.selectedProduct.title}(
-                                  {el.selectedProduct.searchable_title_id})
-                                </span>
-                              </div>
-                              <div>
-                                <strong>
-                                  1 {el.selectedProduct.type} narxi:
-                                </strong>
-                                <span> {el.selectedProduct.price} so'm</span>
-                              </div>
-                            </li>
-                          )}
-                        </>
-                      );
-                    })}
-                </ul>
-              </div>
-            </>
-          )}
-        </div>
+
+        {isCheckVisible && (
+          <div ref={chackRef} className={styles.chechDiv}>
+            <UserDataSummary
+              data={{
+                user_id: selectedUser?.id || "",
+                user_fullName:
+                  `${selectedUser?.name} ${selectedUser?.last_name} ` || "",
+                user_phone: selectedUser?.phone || "",
+                user_comment: selectedUser?.comment || "",
+                daily_price: sections[0]?.dailyPrice.toString() || "0",
+                total_price: sections
+                  .reduce((acc, section) => acc + section.totalPrice, 0)
+                  .toString(),
+                paid_total: "0",
+                products: sections.map((section: any) => ({
+                  product_id:
+                    section.selectedProduct?.searchable_title_id || "",
+                  product_name: section.selectedProduct?.title || "",
+                  quantity_sold:
+                    section.quantity.toString() +
+                    `${section.type == "dona" ? " dona" : " metr"}`,
+                  price_per_day: section.dailyPrice.toString() + " so'm",
+                  unused_days: "0",
+                  ...(section.startDate.length
+                    ? { given_date: section.startDate }
+                    : {}),
+                  ...(section.endDate.length
+                    ? { end_date: section.endDate }
+                    : {}),
+                })),
+                service_car: delivery.length ? delivery : [],
+              }}
+            />
+          </div>
+        )}
       </div>
-    </div>
+    </form>
   );
 };
 

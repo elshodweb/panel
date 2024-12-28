@@ -159,10 +159,10 @@
   width: 100%;
   justify-content: space-between;
   align-items: center;
+  margin-bottom: 100px;
 }
 .chechDiv {
-  overflow: hidden;
-  transform: translate(-1000px, 0);
+  padding: 10px;
 }
 
 @media (max-width: 768px) {

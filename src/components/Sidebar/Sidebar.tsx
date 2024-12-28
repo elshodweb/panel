@@ -41,7 +41,6 @@ const Sidebar: FC<SidebarProps> = ({ selected, setSelected }) => {
   );
   const [isModalOpen, setIsModalOpen] = useState(false);
 
-
   const toggleSection = (key: string) => {
     setOpenSections((prev) => ({
       ...prev,
@@ -139,7 +138,7 @@ const Sidebar: FC<SidebarProps> = ({ selected, setSelected }) => {
   ];
 
   const router = useRouter();
- 
+
   return (
     <div
       ref={sidebarRef}
@@ -153,22 +152,25 @@ const Sidebar: FC<SidebarProps> = ({ selected, setSelected }) => {
           <div key={item.id}>
             {item.children ? (
               <div
-                className={`${styles.menuItem} ${selected === item.key ? styles.active : ""
-                  }`}
+                className={`${styles.menuItem} ${
+                  selected === item.key ? styles.active : ""
+                }`}
                 onClick={() => toggleSection(item.key)}
               >
                 <div className={styles.icon}>{item.icon}</div>
                 {isOpen && <span>{item.name}</span>}
                 <FaChevronRight
-                  className={`${styles.arrow} ${openSections[item.key] ? styles.open : ""
-                    }`}
+                  className={`${styles.arrow} ${
+                    openSections[item.key] ? styles.open : ""
+                  }`}
                 />
               </div>
             ) : (
               <Link href={item.href || "#"} passHref>
                 <div
-                  className={`${styles.menuItem} ${selected === item.key ? styles.active : ""
-                    }`}
+                  className={`${styles.menuItem} ${
+                    selected === item.key ? styles.active : ""
+                  }`}
                   onClick={() => {
                     setSelected(item.key);
                     setIsOpen(false);
@@ -181,14 +183,16 @@ const Sidebar: FC<SidebarProps> = ({ selected, setSelected }) => {
             )}
             {item.children && (
               <div
-                className={`${styles.subMenu} ${openSections[item.key] ? styles.open : styles.closed
-                  }`}
+                className={`${styles.subMenu} ${
+                  openSections[item.key] ? styles.open : styles.closed
+                }`}
               >
                 {item.children.map((subItem) => (
                   <Link href={subItem.href || "#"} passHref key={subItem.id}>
                     <div
-                      className={`${styles.subMenuItem} ${selected === subItem.key ? styles.active : ""
-                        }`}
+                      className={`${styles.subMenuItem} ${
+                        selected === subItem.key ? styles.active : ""
+                      }`}
                       onClick={() => {
                         setSelected(subItem.key);
                         setIsOpen(false);
@@ -206,10 +210,7 @@ const Sidebar: FC<SidebarProps> = ({ selected, setSelected }) => {
           </div>
         ))}
       </div>
-      <div
-
-        onClick={() => setIsModalOpen(true)}
-      >
+      <div className={styles.logoutBtn} onClick={() => setIsModalOpen(true)}>
         <div className={styles.icon}>
           <FaSignOutAlt />
         </div>
@@ -220,18 +221,21 @@ const Sidebar: FC<SidebarProps> = ({ selected, setSelected }) => {
         onClose={() => setIsModalOpen(false)}
         title="Tizimdan chiqishni tasdiqlash"
       >
-        <p className={styles.text}>Haqiqatan ham tizimdan chiqishni xohlaysizmi?</p>
+        <p className={styles.text}>
+          Haqiqatan ham tizimdan chiqishni xohlaysizmi?
+        </p>
         <div className={styles.modalFooter}>
           <button onClick={handleLogout} className={styles.confirmButton}>
             Ha, Chiqish
           </button>
-          <button onClick={() => setIsModalOpen(false)} className={styles.cancelButton}>
+          <button
+            onClick={() => setIsModalOpen(false)}
+            className={styles.cancelButton}
+          >
             Bekor qilish
           </button>
         </div>
       </Modal>
-
-
     </div>
   );
 };
