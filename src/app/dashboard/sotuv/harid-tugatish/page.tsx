@@ -1,35 +1,47 @@
 "use client";
-import React, { useEffect, useState } from "react";
+import React, { forwardRef, useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { RootState, AppDispatch } from "@/store/store";
-import { fetchOrders } from "@/features/order/order"; // Path to the new slice
-import CustomTable from "@/components/Table/Table"; // Assuming you have a component for tables
-import Loader from "@/components/Loader/Loader";
-import styles from "./styles.module.scss";
-import Title from "@/components/Title/Title";
-import AddBtn from "@/components/Buttons/AddBtn/AddBtn";
-import Modal from "@/components/Modal/Modal";
 import axiosInstance from "@/utils/axiosInstance";
+import CustomTable from "@/components/Table/Table";
+import Title from "@/components/Title/Title";
+import Modal from "@/components/Modal/Modal";
+import { RootState, AppDispatch } from "@/store/store";
+import { fetchDebts } from "@/features/debt/debt";
+import styles from "./styles.module.scss";
+import AddBtn from "@/components/Buttons/AddBtn/AddBtn";
+import MyPagination from "@/components/Pagination/Pagination";
+import Snackbar from "@mui/material/Snackbar";
+import MuiAlert from "@mui/material/Alert";
 import {
-  Button,
   FormControl,
   InputLabel,
-  MenuItem,
   Select,
+  MenuItem,
   TextField,
+  Button,
 } from "@mui/material";
-const OrdersPage = () => {
+import { fetchUsers } from "@/features/users/users";
+import Loader from "@/components/Loader/Loader";
+
+// Component for notifications
+const Alert = forwardRef<HTMLDivElement, React.ComponentProps<typeof MuiAlert>>(
+  function Alert(props, ref) {
+    return <MuiAlert elevation={6} ref={ref} variant="filled" {...props} />;
+  }
+);
+
+const DebtPage = () => {
   const dispatch = useDispatch<AppDispatch>();
-  const { orders, status, error } = useSelector(
-    (state: RootState) => state.orders
+  const { debts, status, error, pagination } = useSelector(
+    (state: RootState) => state.debts
   );
 
   const {
     users,
     status: Ustatus,
     error: Uerror,
-    pagination: Upagination,
   } = useSelector((state: RootState) => state.users);
+
   const [snackbarOpen, setSnackbarOpen] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState("");
   const [snackbarSeverity, setSnackbarSeverity] = useState<"success" | "error">(
@@ -37,207 +49,307 @@ const OrdersPage = () => {
   );
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isEditMode, setIsEditMode] = useState(false);
-  const [selectedService, setSelectedService] = useState<any>(null);
+  const [selectedDebt, setSelectedDebt] = useState<any>(null);
   const [formData, setFormData] = useState({
-    price: "",
-    profit_or_expense: "",
-    comment: "",
     user_id: "",
+    remaining_debt: "",
+    isActive: false,
+    comment: "",
+    dayToBeGiven: "",
+    dayGiven: "",
   });
   const [isConfirmDeleteOpen, setIsConfirmDeleteOpen] = useState(false);
+  const [pageSize, setPageSize] = useState(10);
+
+  useEffect(() => {
+    dispatch(fetchDebts({ pageNumber: 1, pageSize }));
+    dispatch(
+      fetchUsers({ pageNumber: 1, pageSize: 200, phone: "null", role: "null" })
+    );
+  }, [dispatch, pageSize]);
+
+  const handleSnackbarClose = (
+    event?: React.SyntheticEvent | Event,
+    reason?: string
+  ) => {
+    if (reason === "clickaway") return;
+    setSnackbarOpen(false);
+  };
+
   const showSnackbar = (message: string, severity: "success" | "error") => {
     setSnackbarMessage(message);
     setSnackbarSeverity(severity);
     setSnackbarOpen(true);
   };
 
-  useEffect(() => {
-    dispatch(fetchOrders());
-  }, [dispatch]);
-
   const handleDelete = async () => {
-    if (!selectedService) return;
+    if (!selectedDebt) return;
 
     try {
       const response = await axiosInstance.delete(
-        `/car-service/delete/${selectedService.id}`
+        `/debt/delete/${selectedDebt.id}`
       );
 
       if (response.status < 300) {
-        dispatch(fetchOrders());
+        dispatch(fetchDebts({ pageNumber: 1, pageSize }));
         setIsConfirmDeleteOpen(false);
-        showSnackbar("Servis muvaffaqiyatli oʻchirildi", "success");
+        showSnackbar("Debt successfully deleted", "success");
       } else {
-        showSnackbar("Servisni o‘chirib bo‘lmadi", "error");
+        showSnackbar("Failed to delete debt", "error");
       }
     } catch (error) {
-      showSnackbar("Servisni oʻchirishda xatolik yuz berdi", "error");
+      showSnackbar("Error occurred while deleting debt", "error");
     }
   };
 
-  const handleUpdate = (order: any) => {
-    // You can dispatch an action for updating an order here
+  const handleUpdate = (debt: any) => {
+    setIsEditMode(true);
+    setSelectedDebt(debt);
+
+    setFormData({
+      user_id: debt.user_id.id || "",
+      comment: debt.comment,
+      dayGiven: debt.dayGiven,
+      dayToBeGiven: debt.dayToBeGiven,
+      isActive: debt.isActive,
+      remaining_debt: debt.remaining_debt,
+    });
+    setIsModalOpen(true);
+  };
+
+  const handleCreate = () => {
+    setIsEditMode(false);
+    setSelectedDebt(null);
+    setFormData({
+      user_id: "",
+      comment: "",
+      dayGiven: "",
+      dayToBeGiven: "",
+      isActive: false,
+      remaining_debt: "",
+    });
+    setIsModalOpen(true);
   };
 
   const handleFormSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     const endpoint = isEditMode
-      ? `/car-service/update/${selectedService.id}`
-      : "/car-service/create";
+      ? `/debt/update/${selectedDebt.id}`
+      : "/debt/create";
 
     try {
       const response = await axiosInstance({
         method: isEditMode ? "patch" : "post",
         url: endpoint,
-        data: formData,
+        data: { ...formData, isActive: "" + formData.isActive },
       });
 
       if (response.status >= 200 && response.status < 300) {
-        dispatch(fetchOrders());
+        dispatch(fetchDebts({ pageNumber: 1, pageSize }));
         setIsModalOpen(false);
         showSnackbar(
           isEditMode
-            ? "Servis muvaffaqiyatli yangilandi"
-            : "Servis muvaffaqiyatli qo'shildi",
+            ? "Debt successfully updated"
+            : "Debt successfully created",
           "success"
         );
       } else {
-        showSnackbar("Servis saqlanmadi", "error");
+        showSnackbar("Failed to save debt", "error");
       }
     } catch (error) {
-      showSnackbar("Servisni saqlanishida hato ketdi", "error");
+      showSnackbar("Error occurred while saving debt", "error");
     }
   };
 
   return (
     <div className={styles.wrapper}>
       <div className={styles.row}>
-        <Title>Harid qilish</Title>
+        <Title>Debts</Title>
         <div className={styles.right}>
-          <AddBtn onClick={() => {}} />
+          <AddBtn onClick={handleCreate} />
         </div>
       </div>
-      {status === "loading" && <Loader />}
+
+      <Snackbar
+        open={snackbarOpen}
+        autoHideDuration={6000}
+        onClose={handleSnackbarClose}
+      >
+        <Alert onClose={handleSnackbarClose} severity={snackbarSeverity}>
+          {snackbarMessage}
+        </Alert>
+      </Snackbar>
+
+      {status === "loading" && <p><Loader /> </p>}
       {status === "failed" && <p>Error: {error}</p>}
       {status === "succeeded" && (
         <>
           <CustomTable
             keys={[
               "user_name",
-              "total_price",
-              "paid_total",
+              "user_phone",
+              "remaining_debt",
+              "comment",
               "isActive",
-              "data_sequence",
+              "dayGiven",
+              "dayToBeGiven",
             ]}
             titles={[
               "Foydalanuvchi",
-              "Jami narx",
-              "To'langan jami",
-              "Faol holat",
-              "Sana",
+              "F. Telefoni",
+              "Qolgan Qarz",
+              "Izoh",
+              "Faol",
+              "Berilgan Sana",
+              "Qaytarish Sanasi",
             ]}
-            data={orders.map((order) => ({
-              ...order,
-              user_name: `${order.user_id.first_name} ${order.user_id.name}`,
-              isActive: order.isActive === "1" ? "Activ" : "Activ emas",
-              data_sequence: order.data_sequence.split("T")[0],
+            data={debts.map((debt) => ({
+              ...debt,
+              user_name: debt.user_id
+                ? `${debt.user_id.first_name} ${debt.user_id.name} `
+                : "User yo'q",
+              isActive: debt.isActive ? "Faol" : "Faol emas",
+              user_phone: debt.user_id ? debt.user_id.phone : "User yo'q",
             }))}
-            onDelete={handleDelete} // Provide onDelete function
-            onUpdate={handleUpdate} // Provide onUpdate function
+            onDelete={(debt) => {
+              setSelectedDebt(debt);
+              setIsConfirmDeleteOpen(true);
+            }}
+            onUpdate={handleUpdate}
           />
+
+          <MyPagination
+            currentPage={pagination.currentPage}
+            onPageChange={(event, page) => {
+              dispatch(fetchDebts({ pageNumber: page, pageSize }));
+            }}
+            pageSize={pageSize}
+            setPageSize={setPageSize}
+            totalPages={pagination.totalPages}
+          />
+
+          {/* Modal for Create and Update */}
+          <Modal
+            isOpen={isModalOpen}
+            onClose={() => setIsModalOpen(false)}
+            title={isEditMode ? "Edit Debt" : "Create Debt"}
+          >
+            <form onSubmit={handleFormSubmit}>
+              {/* Remaining Debt */}
+              <TextField
+                label="Remaining Debt"
+                value={formData.remaining_debt}
+                onChange={(e) =>
+                  setFormData({ ...formData, remaining_debt: e.target.value })
+                }
+                fullWidth
+                margin="normal"
+              />
+
+              {/* Comment */}
+              <TextField
+                label="Comment"
+                value={formData.comment}
+                onChange={(e) =>
+                  setFormData({ ...formData, comment: e.target.value })
+                }
+                fullWidth
+                margin="normal"
+              />
+
+              {/* Date to be Given */}
+              <TextField
+                label="Date to be Given"
+                type="date"
+                value={formData.dayToBeGiven}
+                onChange={(e) =>
+                  setFormData({ ...formData, dayToBeGiven: e.target.value })
+                }
+                fullWidth
+                margin="normal"
+                InputLabelProps={{ shrink: true }}
+              />
+
+              {/* Date Given */}
+              <TextField
+                label="Date Given"
+                type="date"
+                value={formData.dayGiven}
+                onChange={(e) =>
+                  setFormData({ ...formData, dayGiven: e.target.value })
+                }
+                fullWidth
+                margin="normal"
+                InputLabelProps={{ shrink: true }}
+              />
+
+              {/* isActive */}
+              <FormControl fullWidth margin="normal">
+                <InputLabel id="isActive-label">Active Status</InputLabel>
+                <Select
+                  labelId="isActive-label"
+                  value={formData.isActive ? "true" : "false"}
+                  onChange={(e) =>
+                    setFormData({
+                      ...formData,
+                      isActive: e.target.value === "true",
+                    })
+                  }
+                  label="Active Status"
+                >
+                  <MenuItem value="true">Active</MenuItem>
+                  <MenuItem value="false">Inactive</MenuItem>
+                </Select>
+              </FormControl>
+
+              {/* User Selection */}
+              <FormControl fullWidth margin="normal">
+                <InputLabel id="users-label">User</InputLabel>
+                <Select
+                  labelId="users-label"
+                  value={formData.user_id}
+                  onChange={(e) =>
+                    setFormData({ ...formData, user_id: e.target.value })
+                  }
+                  label="User"
+                  required
+                >
+                  {users.map((user,i) => (
+                    <MenuItem key={i} value={user.id}>
+                      {user.first_name} {user.name} ({user.phone})
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+
+              <Button
+                type="submit"
+                variant="contained"
+                color="primary"
+                fullWidth
+                sx={{ marginTop: 2 }}
+              >
+                {isEditMode ? "Save" : "Create"}
+              </Button>
+            </form>
+          </Modal>
+
+          <Modal
+            isOpen={isConfirmDeleteOpen}
+            onClose={() => setIsConfirmDeleteOpen(false)}
+            title="O'chirishni Tasdiqlash"
+          >
+            <p>Ushbu kategoriyani o‘chirishga ishonchingiz komilmi?</p>
+            <button onClick={handleDelete}>Ha, O'chirish</button>
+            <button onClick={() => setIsConfirmDeleteOpen(false)}>
+              Bekor qilish
+            </button>
+          </Modal>
         </>
       )}
-
-      <Modal
-        isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
-        title={isEditMode ? "Servisni o'zgartirish" : "Servis yaratish"}
-      >
-        <form onSubmit={handleFormSubmit}>
-          <TextField
-            label="Narx"
-            value={formData.price}
-            onChange={(e) =>
-              setFormData({ ...formData, price: e.target.value })
-            }
-            fullWidth
-            required
-            margin="normal"
-          />
-          <FormControl fullWidth margin="normal">
-            <InputLabel id="profit-or-expense-label">Turi</InputLabel>
-            <Select
-              labelId="profit-or-expense-label"
-              value={formData.profit_or_expense}
-              onChange={(e) =>
-                setFormData({
-                  ...formData,
-                  profit_or_expense: e.target.value,
-                })
-              }
-              label="Turi"
-              required
-            >
-              <MenuItem value="profit">Daromad</MenuItem>
-              <MenuItem value="expense">Xarajat</MenuItem>
-            </Select>
-          </FormControl>
-          <TextField
-            label="Izoh"
-            value={formData.comment}
-            onChange={(e) =>
-              setFormData({ ...formData, comment: e.target.value })
-            }
-            fullWidth
-            margin="normal"
-          />
-
-          {/* Select for Users */}
-          <FormControl fullWidth margin="normal">
-            <InputLabel id="users-label">Foydalanuvchi</InputLabel>
-            <Select
-              labelId="users-label"
-              value={formData.user_id}
-              onChange={(e) =>
-                setFormData({ ...formData, user_id: e.target.value })
-              }
-              label="Foydalanuvchi"
-              required
-            >
-              {/* <MenuItem value={"null"}>Olib tashlash</MenuItem> */}
-              {users.map((user,i) => (
-                <MenuItem key={i} value={user.id}>
-                  {user.name}
-                </MenuItem>
-              ))}
-            </Select>
-          </FormControl>
-
-          <Button
-            type="submit"
-            variant="contained"
-            color="primary"
-            fullWidth
-            sx={{ marginTop: 2 }}
-          >
-            {isEditMode ? "Saqlash" : "Qo'shish"}
-          </Button>
-        </form>
-      </Modal>
-      <Modal
-        isOpen={isConfirmDeleteOpen}
-        onClose={() => setIsConfirmDeleteOpen(false)}
-        title="O'chirishni Tasdiqlash"
-      >
-        <p>Ushbu kategoriyani o‘chirishga ishonchingiz komilmi?</p>
-        <button onClick={handleDelete}>Ha, O'chirish</button>
-        <button onClick={() => setIsConfirmDeleteOpen(false)}>
-          Bekor qilish
-        </button>
-      </Modal>
     </div>
   );
 };
 
-export default OrdersPage;
+export default DebtPage;
