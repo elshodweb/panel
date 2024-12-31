@@ -6,6 +6,7 @@ import userReducer from "@/features/users/users";
 import carServiceReducer from "@/features/cars/cars";
 import debtReducer from "@/features/debt/debt"; // Импортируйте debtSlice.reducer
 import orderReducer from "@/features/order/order"; // Импортируйте orderSlice.reducer
+import ordersWithFilterReducer from "@/features/order/orderWithFilter"; // Импортируйте orderSlice.reducer
 
 const rootReducer = combineReducers({
   productCategories: productCategoryReducer,
@@ -15,6 +16,7 @@ const rootReducer = combineReducers({
   carServices: carServiceReducer,
   debts: debtReducer, // Добавляем редьюсер для debt
   orders: orderReducer,
+  ordersWithFilter: ordersWithFilterReducer, // Добавляем редьюсер для ordersWithFilter
 });
 
 const store = configureStore({

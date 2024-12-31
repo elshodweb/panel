@@ -28,53 +28,76 @@ interface Order {
   carServices: [];
 }
 
+interface Pagination {
+  currentPage: number;
+  totalPages: number;
+  pageSize: number;
+  totalItems: number;
+}
+
+interface ApiResponse {
+  results: Order[];
+  pagination: Pagination;
+}
+
 interface OrderState {
   orders: Order[];
+  pagination: Pagination;
   status: "idle" | "loading" | "succeeded" | "failed";
   error: string | null;
 }
 
 const initialState: OrderState = {
   orders: [],
+  pagination: {
+    currentPage: 1,
+    totalPages: 1,
+    pageSize: 10,
+    totalItems: 0,
+  },
   status: "idle",
   error: null,
 };
 
-export const fetchOrders = createAsyncThunk<Order[]>(
-  "orders/fetchOrders",
-  async () => {
-    const response = await axiosInstance.get<Order[]>("/order/all", {
+export const fetchOrdersWithFilter = createAsyncThunk<
+  ApiResponse,
+  { title: string; pageNumber: number; pageSize: number }
+>("orders/fetchOrdersWithFilter", async (params) => {
+  const response = await axiosInstance.get<ApiResponse>(
+    `/order/all?title=${params.title}&pageNumber=${params.pageNumber}&pageSize=${params.pageSize}`,
+    {
       headers: {
         accept: "*/*",
       },
-    });
+    }
+  );
 
-    return response.data;
-  }
-);
+  return response.data;
+});
 
-const orderSlice = createSlice({
+const orderSliceWithFilter = createSlice({
   name: "orders",
   initialState,
   reducers: {},
   extraReducers: (builder) => {
     builder
-      .addCase(fetchOrders.pending, (state) => {
+      .addCase(fetchOrdersWithFilter.pending, (state) => {
         state.status = "loading";
         state.error = null;
       })
       .addCase(
-        fetchOrders.fulfilled,
-        (state, action: PayloadAction<Order[]>) => {
+        fetchOrdersWithFilter.fulfilled,
+        (state, action: PayloadAction<ApiResponse>) => {
           state.status = "succeeded";
-          state.orders = action.payload;
+          state.orders = action.payload.results;
+          state.pagination = action.payload.pagination;
         }
       )
-      .addCase(fetchOrders.rejected, (state, action) => {
+      .addCase(fetchOrdersWithFilter.rejected, (state, action) => {
         state.status = "failed";
         state.error = action.error.message || "Failed to fetch orders";
       });
   },
 });
 
-export default orderSlice.reducer;
+export default orderSliceWithFilter.reducer;
