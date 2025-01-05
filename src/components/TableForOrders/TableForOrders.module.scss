@@ -20,7 +20,10 @@
     background: #555;
   }
 }
-
+.Item {
+  white-space: nowrap; /* Запрещает перенос текста */
+  padding: 5px;
+}
 .table {
   width: 100%;
   border-collapse: collapse;
@@ -35,14 +38,14 @@
   th,
   td {
     padding: 12px 15px;
-    text-align: left;
+    text-align: end;
     border-bottom: 1px solid #ddd;
+    white-space: nowrap; /* Запрещает перенос текста */
   }
 
   th {
     background-color: #f4f4f4;
     font-weight: bold;
-    text-transform: capitalize;
   }
 
   tr:hover {
@@ -80,7 +83,6 @@
     }
   }
 }
-
 
 .modalContent {
   padding: 20px;

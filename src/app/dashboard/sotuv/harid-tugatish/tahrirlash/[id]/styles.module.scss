@@ -1,0 +1,184 @@
+.wrapper {
+  padding-top: 70px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.row {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: 10px;
+  position: fixed;
+  top: 0;
+  width: calc(100% - 80px);
+  background: #fff;
+  z-index: 2;
+  padding: 15px;
+  gap: 10px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.autocomplete {
+  max-width: 300px;
+  width: 100%;
+  display: block;
+}
+
+.content {
+  margin-top: 80px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.rowDiv {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 40px;
+}
+.userSection {
+  border: 1px solid #e1e1e1;
+  padding: 10px;
+  border-radius: 10px;
+  width: 100%;
+  max-width: 500px;
+  background-color: #fff;
+}
+.product {
+  background-color: #fff;
+  padding: 10px;
+  border: 1px solid #ddd; 
+  border-radius: 10px;
+
+  width: 100%;
+  max-width: 500px;
+  flex: 1 1 auto;
+}
+.numberOfProduct {
+  margin: 0;
+  margin-bottom: 10px;
+  font-size: 20px;
+}
+.title {
+  margin: 0;
+  margin-bottom: 10px;
+  padding: 0;
+  text-transform: capitalize;
+}
+
+.productRow {
+  display: flex;
+  justify-content: space-between;
+  gap: 15px; 
+  margin-bottom: 10px;
+}
+
+.left,
+.right {
+  width: 48%; 
+}
+
+.del {
+  height: max-content;
+}
+
+.selectedProductInfo {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 10px;
+  font-size: 14px;
+  color: #555;
+}
+
+.productInput {
+  width: 100px;
+  padding: 8px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 14px;
+  margin-right: 10px;
+}
+
+.productDateInput {
+  width: 150px;
+  padding: 8px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 14px;
+  margin-right: 10px;
+}
+
+.productButton {
+  padding: 8px 16px;
+  border-radius: 4px;
+  font-size: 14px;
+  margin-top: 10px;
+}
+
+.productButton:hover {
+  background-color: #0056b3;
+  color: white;
+}
+.car {
+  max-width: 500px;
+  background-color: #fff;
+  border: 1px solid #e1e1e1;
+  padding: 10px;
+  width: 100%;
+  border-radius: 10px;
+}
+.carRow {
+  display: flex;
+  gap: 10px;
+  & + & {
+    margin-top: 10px;
+  }
+}
+.cars {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 20px;
+  margin-top: 30px;
+}
+.carLeft {
+  width: 50%;
+}
+.carRight {
+  width: 50%;
+}
+.btnWithIcon {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.btns {
+  display: flex;
+  width: 100%;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 100px;
+}
+.chechDiv {
+  padding: 10px;
+}
+
+@media (max-width: 768px) {
+  .content {
+    padding-left: 5%;
+    padding-right: 5%;
+  }
+
+  .productRow {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .left,
+  .right {
+    width: 100%;
+    max-width: none;
+  }
+}

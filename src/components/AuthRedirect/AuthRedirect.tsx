@@ -13,8 +13,6 @@ const AuthRedirect: React.FC = () => {
 
     if (!token) {
       router.push("/login");
-    } else {
-      router.push("/dashboard/sotuv/harid-tugatish");
     }
     setLoading(false); // Устанавливаем загрузку в false после проверки
   }, [router]);
