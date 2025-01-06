@@ -25,6 +25,23 @@
   justify-content: flex-end;
   width: 100%;
 }
+.datePicker {
+  display: flex;
+  flex-direction: column;
+  margin-right: 16px;
+}
+
+.datePicker label {
+  margin-bottom: 4px;
+  font-size: 14px;
+}
+
+.datePicker input {
+  padding: 8px;
+  font-size: 14px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
 
 @media (max-width: 530px) {
   .row {

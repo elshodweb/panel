@@ -10,8 +10,13 @@ import styles from "./styles.module.scss";
 import MyPagination from "@/components/Pagination/Pagination";
 import Snackbar from "@mui/material/Snackbar";
 import MuiAlert from "@mui/material/Alert";
+import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
+import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
+import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 
 import Loader from "@/components/Loader/Loader";
+import Search from "@/components/Search/Search";
+import { FormControl, InputLabel, MenuItem, Select } from "@mui/material";
 
 const Alert = forwardRef<HTMLDivElement, React.ComponentProps<typeof MuiAlert>>(
   function Alert(props, ref) {
@@ -25,7 +30,10 @@ const OrderPage = () => {
     (state: RootState) => state.ordersWithFilter
   );
   console.log(orders);
-
+  const [search, setSearch] = useState("");
+  const [id, setId] = useState("");
+  const [nomer, setNomer] = useState<string | undefined>(undefined);
+  const [name, setName] = useState<string | undefined>(undefined);
   const [snackbarOpen, setSnackbarOpen] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState("");
   const [snackbarSeverity, setSnackbarSeverity] = useState<"success" | "error">(
@@ -33,10 +41,24 @@ const OrderPage = () => {
   );
 
   const [pageSize, setPageSize] = useState(10);
+  const [isActive, setIsActive] = useState<boolean | undefined>(undefined);
+  const [startDate, setStartDate] = useState<string | undefined>(undefined);
+  const [endDate, setEndDate] = useState<string | undefined>(undefined);
 
   useEffect(() => {
-    dispatch(fetchOrdersWithFilter({ title: "", pageNumber: 1, pageSize }));
-  }, [dispatch, pageSize]);
+    dispatch(
+      fetchOrdersWithFilter({
+        title: "",
+        pageNumber: 1,
+        pageSize,
+        isActive,
+        nomer,
+        name,
+        startDate,
+        endDate,
+      })
+    );
+  }, [dispatch, pageSize, isActive, startDate, endDate]);
 
   const handleSnackbarClose = (
     event?: React.SyntheticEvent | Event,
@@ -56,6 +78,105 @@ const OrderPage = () => {
     <div className={styles.wrapper}>
       <div className={styles.row}>
         <Title>Orders</Title>
+
+        <div className={styles.datePicker}>
+          <label>Boshlanish sanasi:</label>
+          <input
+            type="date"
+            value={startDate || ""}
+            onChange={(e) => setStartDate(e.target.value || undefined)}
+          />
+        </div>
+        <div className={styles.datePicker}>
+          <label>Tugash sanasi:</label>
+          <input
+            type="date"
+            value={endDate || ""}
+            onChange={(e) => setEndDate(e.target.value || undefined)}
+          />
+        </div>
+
+        {/* <LocalizationProvider dateAdapter={AdapterDateFns}>
+          <DatePicker
+            label="Boshlanish sanasi"
+            value={startDate}
+            onChange={(newValue) => setStartDate(newValue)}
+            renderInput={(params) => (
+              <input {...params.inputProps} className={styles.datePicker} />
+            )}
+          />
+          <DatePicker
+            label="Tugash sanasi"
+            value={endDate}
+            onChange={(newValue) => setEndDate(newValue)}
+            renderInput={(params) => (
+              <input {...params.inputProps} className={styles.datePicker} />
+            )}
+          /> */}
+        {/* </LocalizationProvider> */}
+
+        {/* Search component for nomer and name */}
+        <FormControl size="small" className={styles.select} fullWidth>
+          <InputLabel id="is-active-label">Holatini tanlang</InputLabel>
+          <Select
+            labelId="is-active-label"
+            value={isActive !== undefined ? isActive.toString() : ""}
+            onChange={(e) =>
+              setIsActive(
+                e.target.value === "" ? undefined : e.target.value === "true"
+              )
+            }
+            label="Holatini tanlang"
+          >
+            <MenuItem value="">Barchasi</MenuItem>
+            <MenuItem value="true">Faol</MenuItem>
+            <MenuItem value="false">Faol emas</MenuItem>
+          </Select>
+        </FormControl>
+
+        <Search
+          onChange={(e) => {
+            const value = e.target.value;
+            if (value == "") {
+              dispatch(
+                fetchOrdersWithFilter({
+                  title: "",
+                  pageNumber: 1,
+                  pageSize,
+                  isActive,
+                  nomer,
+                  name,
+                  startDate,
+                  endDate,
+                })
+              );
+            }
+            if (!isNaN(parseFloat(value))) {
+              setNomer(value); // Use as phone number or ID
+              setName(""); // Clear name search
+            } else {
+              setName(value); // Use as name
+              setNomer(""); // Clear phone number search
+            }
+            setSearch(value);
+          }}
+          placeholder="Qidirish (Nomi, Id)"
+          onClick={() => {
+            dispatch(
+              fetchOrdersWithFilter({
+                title: "",
+                pageNumber: 1,
+                pageSize,
+                isActive,
+                nomer,
+                name,
+                startDate,
+                endDate,
+              })
+            );
+          }}
+          search={search}
+        />
       </div>
 
       <Snackbar
@@ -77,7 +198,6 @@ const OrderPage = () => {
       {status === "succeeded" && (
         <>
           <TableForOrders
-            
             data={orders}
             onUpdate={() => {}}
             onDelete={async (order) => {
@@ -91,6 +211,11 @@ const OrderPage = () => {
                       title: "",
                       pageNumber: 1,
                       pageSize,
+                      isActive,
+                      nomer,
+                      name,
+                      startDate,
+                      endDate,
                     })
                   );
                   showSnackbar("Order successfully deleted", "success");
@@ -107,7 +232,16 @@ const OrderPage = () => {
             currentPage={pagination.currentPage}
             onPageChange={(event, page) => {
               dispatch(
-                fetchOrdersWithFilter({ title: "", pageNumber: page, pageSize })
+                fetchOrdersWithFilter({
+                  title: "",
+                  pageNumber: page,
+                  pageSize,
+                  isActive,
+                  nomer,
+                  name,
+                  startDate,
+                  endDate,
+                })
               );
             }}
             pageSize={pageSize}

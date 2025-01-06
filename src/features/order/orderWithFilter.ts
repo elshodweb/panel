@@ -61,10 +61,32 @@ const initialState: OrderState = {
 
 export const fetchOrdersWithFilter = createAsyncThunk<
   ApiResponse,
-  { title: string; pageNumber: number; pageSize: number }
+  {
+    title?: string;
+    pageNumber: number;
+    pageSize: number;
+    isActive?: boolean;
+    nomer?: string;
+    name?: string;
+    startDate?: string;
+    endDate?: string;
+  }
 >("orders/fetchOrdersWithFilter", async (params) => {
+  const queryParams = new URLSearchParams();
+
+  // Добавляем параметры к запросу, если они переданы
+  queryParams.append("pageNumber", params.pageNumber.toString());
+  queryParams.append("pageSize", params.pageSize.toString());
+  if (params.title) queryParams.append("title", params.title);
+  if (params.isActive !== undefined)
+    queryParams.append("isActive", params.isActive.toString());
+  if (params.nomer) queryParams.append("nomer", params.nomer);
+  if (params.name) queryParams.append("name", params.name);
+  if (params.startDate) queryParams.append("startDate", params.startDate);
+  if (params.endDate) queryParams.append("endDate", params.endDate);
+
   const response = await axiosInstance.get<ApiResponse>(
-    `/order/all?title=${params.title}&pageNumber=${params.pageNumber}&pageSize=${params.pageSize}`,
+    `/order/all?${queryParams.toString()}`,
     {
       headers: {
         accept: "*/*",
@@ -74,6 +96,7 @@ export const fetchOrdersWithFilter = createAsyncThunk<
 
   return response.data;
 });
+
 
 const orderSliceWithFilter = createSlice({
   name: "orders",
