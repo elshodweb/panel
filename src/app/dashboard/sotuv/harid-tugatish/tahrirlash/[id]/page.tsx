@@ -50,7 +50,6 @@ const Page = () => {
         endDate: "",
       },
     ]);
-    console.log(response);
   }
   useEffect(() => {
     fetchOrder();

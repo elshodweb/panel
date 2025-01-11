@@ -10,13 +10,11 @@ import styles from "./styles.module.scss";
 import MyPagination from "@/components/Pagination/Pagination";
 import Snackbar from "@mui/material/Snackbar";
 import MuiAlert from "@mui/material/Alert";
-import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
-import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
-import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 
 import Loader from "@/components/Loader/Loader";
 import Search from "@/components/Search/Search";
 import { FormControl, InputLabel, MenuItem, Select } from "@mui/material";
+import Modal from "@/components/Modal/Modal";
 
 const Alert = forwardRef<HTMLDivElement, React.ComponentProps<typeof MuiAlert>>(
   function Alert(props, ref) {
@@ -45,6 +43,37 @@ const OrderPage = () => {
   const [startDate, setStartDate] = useState<string | undefined>(undefined);
   const [endDate, setEndDate] = useState<string | undefined>(undefined);
 
+  const [isConfirmDeleteOpen, setIsConfirmDeleteOpen] = useState(false);
+  const [selectedOrder, setSelectedOrder] = useState<any>(null);
+
+  async function handleDelete() {
+    try {
+      const response = await axiosInstance.delete(
+        `/order/delete/${selectedOrder.id}`
+      );
+      if (response.status >= 200 && response.status < 300) {
+        dispatch(
+          fetchOrdersWithFilter({
+            title: "",
+            pageNumber: 1,
+            pageSize,
+            isActive,
+            nomer,
+            name,
+            startDate,
+            endDate,
+          })
+        );
+        showSnackbar("Order successfully deleted", "success");
+      } else {
+        showSnackbar("Failed to delete order", "error");
+      }
+    } catch (error) {
+      showSnackbar("Error occurred while deleting order", "error");
+    }
+    setSelectedOrder(null);
+    setIsConfirmDeleteOpen(false);
+  }
   useEffect(() => {
     dispatch(
       fetchOrdersWithFilter({
@@ -201,32 +230,21 @@ const OrderPage = () => {
             data={orders}
             onUpdate={() => {}}
             onDelete={async (order) => {
-              try {
-                const response = await axiosInstance.delete(
-                  `/order/delete/${order.id}`
-                );
-                if (response.status >= 200 && response.status < 300) {
-                  dispatch(
-                    fetchOrdersWithFilter({
-                      title: "",
-                      pageNumber: 1,
-                      pageSize,
-                      isActive,
-                      nomer,
-                      name,
-                      startDate,
-                      endDate,
-                    })
-                  );
-                  showSnackbar("Order successfully deleted", "success");
-                } else {
-                  showSnackbar("Failed to delete order", "error");
-                }
-              } catch (error) {
-                showSnackbar("Error occurred while deleting order", "error");
-              }
+              setIsConfirmDeleteOpen(true);
+              setSelectedOrder(order);
             }}
           />
+          <Modal
+            isOpen={isConfirmDeleteOpen}
+            onClose={() => setIsConfirmDeleteOpen(false)}
+            title="Mahsulotni o'chirish"
+          >
+            <p>Haqiqatan ham ushbu haridni o'chirishni istaysizmi?</p>
+            <button onClick={handleDelete}>O'chirish</button>
+            <button onClick={() => setIsConfirmDeleteOpen(false)}>
+              Bekor qilish
+            </button>
+          </Modal>
 
           <MyPagination
             currentPage={pagination.currentPage}
