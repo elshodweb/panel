@@ -27,29 +27,41 @@ import { useParams } from "next/navigation";
 const Page = () => {
   const params = useParams();
   const { id } = params;
-  
+
   async function fetchOrder() {
     const response = await axiosInstance.get(`/order/one/${id}`);
-    const data = response.data;
+    const data: any = response.data;
     console.log(data);
-    
-    setSections((prev) => [
-      ...prev,
-      {
+    setSelectedUser(data.user_id);
+    setDelivery(data.carServices);
+    let products = data.orderProducts.map((i: any) => {
+      const quantity =
+        i.product_id.type == "dona" ? i.quantity_sold : i.measurement_sold;
+      const startDate = new Date(i.given_date);
+      const endDate = new Date(i.end_date);
+      const rentalDays = Math.ceil(
+        (endDate.getTime() - startDate.getTime()) / (1000 * 3600 * 24)
+      );
+      const totalPrice = i.product_id.price * quantity * rentalDays;
+      return {
+        order_product_id: i.product_id.id,
         selectedCategory: null,
+
         categoryTitle: "",
-        selectedProduct: null,
-        productTitle: "",
-        quantity: 1,
-        rentalDays: 1,
-        totalPrice: 0,
-        dailyPrice: 0,
-        price: 0,
-        type: "",
-        startDate: "",
-        endDate: "",
-      },
-    ]);
+        selectedProduct: i.product_id,
+        productTitle: i.product_id.title,
+        quantity,
+        rentalDays,
+        totalPrice,
+        dailyPrice: i.price_per_day,
+        type: i.product_id.type,
+        price: i.product_id.price,
+        startDate: i.given_date,
+        endDate: i.end_date,
+      };
+    });
+
+    setSections(products);
   }
   useEffect(() => {
     fetchOrder();
@@ -86,6 +98,7 @@ const Page = () => {
     {
       selectedCategory: null,
       categoryTitle: "",
+
       selectedProduct: null,
       productTitle: "",
       quantity: 1,
@@ -257,7 +270,10 @@ const Page = () => {
     };
 
     try {
-      const response = await axiosInstance.post("/order/create", requestData);
+      const response = await axiosInstance.patch(
+        "/order/update/" + id,
+        requestData
+      );
       console.log("Успешный ответ:", response.data);
     } catch (error: any) {
       console.error("Ошибка при отправке данных:", error);
@@ -372,6 +388,7 @@ const Page = () => {
               id="user-selection-autocomplete"
               size="small"
               options={users}
+              value={selectedUser}
               onChange={(event, value) => setSelectedUser(value)}
               getOptionLabel={(option: any) =>
                 `${option.name || "Без имени"} (${
@@ -439,6 +456,7 @@ const Page = () => {
                     onChange={(event, value) =>
                       handleSelectProduct(index, value)
                     }
+                    value={section.selectedProduct}
                     getOptionLabel={(option: any) =>
                       option.title + " (" + option.searchable_title_id + ")" ||
                       "Без названия"
