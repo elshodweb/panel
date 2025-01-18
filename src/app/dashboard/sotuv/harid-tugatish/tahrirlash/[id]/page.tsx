@@ -19,7 +19,11 @@ import {
 } from "react-icons/fa";
 import { fetchCarServices } from "@/features/cars/cars";
 import axiosInstance from "@/utils/axiosInstance";
-import { DeliveryDetails, RentalDetails } from "../../../../../../../types";
+import {
+  ActionTypesEnum,
+  DeliveryDetails,
+  RentalDetails,
+} from "../../../../../../../types";
 import { useReactToPrint } from "react-to-print";
 import UserDataSummary from "@/components/Check/Check";
 import { useParams } from "next/navigation";
@@ -31,7 +35,6 @@ const Page = () => {
   async function fetchOrder() {
     const response = await axiosInstance.get(`/order/one/${id}`);
     const data: any = response.data;
-    console.log(data);
     setSelectedUser(data.user_id);
     setDelivery(data.carServices);
     let products = data.orderProducts.map((i: any) => {
@@ -43,10 +46,11 @@ const Page = () => {
         (endDate.getTime() - startDate.getTime()) / (1000 * 3600 * 24)
       );
       const totalPrice = i.product_id.price * quantity * rentalDays;
+      console.log("gftgftgft", i);
+
       return {
         order_product_id: i.product_id.id,
         selectedCategory: null,
-
         categoryTitle: "",
         selectedProduct: i.product_id,
         productTitle: i.product_id.title,
@@ -58,6 +62,7 @@ const Page = () => {
         price: i.product_id.price,
         startDate: i.given_date,
         endDate: i.end_date,
+        status: i.IsActive,
       };
     });
 
@@ -69,15 +74,15 @@ const Page = () => {
   const dispatch = useDispatch<AppDispatch>();
   const chackRef = useRef(null);
   const reactToPrintFn = useReactToPrint({
-    contentRef: chackRef, // Use contentRef in the newer version
-    onAfterPrint: () => setIsCheckVisible(false), // Hide after printing
+    contentRef: chackRef,
+    onAfterPrint: () => setIsCheckVisible(false),
   });
 
   const handlePrint = () => {
-    setIsCheckVisible(true); // Show the receipt before printing
+    setIsCheckVisible(true);
     setTimeout(() => {
-      reactToPrintFn(); // Trigger the print function
-    }, 100); // Ensure the state is updated before printing
+      reactToPrintFn();
+    }, 100);
   };
 
   const {
@@ -98,7 +103,6 @@ const Page = () => {
     {
       selectedCategory: null,
       categoryTitle: "",
-
       selectedProduct: null,
       productTitle: "",
       quantity: 1,
@@ -109,14 +113,13 @@ const Page = () => {
       price: 0,
       startDate: "",
       endDate: "",
+      action: ActionTypesEnum.GET,
     },
   ]);
-  const { carServices, status, error } = useSelector(
-    (state: RootState) => state.carServices
-  );
   const [delivery, setDelivery] = useState<DeliveryDetails[]>([
     {
       comment: "",
+      service_car_id: "",
       price: "",
     },
   ]);
@@ -165,7 +168,6 @@ const Page = () => {
   }, [dispatch]);
 
   useEffect(() => {
-    // Загружаем оригинальные продукты при первом рендере
     dispatch(
       fetchProducts({
         pageNumber: 1,
@@ -207,6 +209,7 @@ const Page = () => {
         type: "",
         startDate: "",
         endDate: "",
+        action: ActionTypesEnum.CREATE,
       },
     ]);
   };
@@ -217,6 +220,7 @@ const Page = () => {
       {
         comment: "",
         price: "",
+        service_car_id: "",
       },
     ]);
   };
@@ -257,16 +261,25 @@ const Page = () => {
         .reduce((acc, section) => acc + section.totalPrice, 0)
         .toString(),
       paid_total: "0",
-      products: sections.map((section) => ({
-        product_id: section.selectedProduct?.id || "",
-        measurement_sold: section.quantity.toString(),
-        quantity_sold: section.quantity.toString(),
-        price_per_day: section.dailyPrice.toString(),
-        unused_days: "0",
-        ...(section.startDate.length ? { given_date: section.startDate } : {}),
-        ...(section.endDate.length ? { end_date: section.endDate } : {}),
-      })),
-      service_car: delivery.length ? delivery : [],
+      products: sections.map((section: any) => {
+        console.log("asd", section);
+
+        return {
+          order_product_id: section.selectedProduct?.id || "",
+          measurement_sold: section.quantity.toString(),
+          quantity_sold: section.quantity.toString(),
+          price_per_day: section.dailyPrice.toString(),
+          status: section.status,
+
+          ...(section.startDate.length
+            ? { given_date: section.startDate }
+            : {}),
+          ...(section.endDate.length ? { end_date: section.endDate } : {}),
+        };
+      }),
+      service_car: delivery.length
+        ? delivery.map((i: any) => ({ ...i, service_car_id: i.id }))
+        : [],
     };
 
     try {
@@ -477,7 +490,6 @@ const Page = () => {
                           const inputValue = e.target.value;
                           setTitleOrId(inputValue);
                           const isNumeric = /^\d+$/.test(inputValue);
-
                           updateProducts(
                             index,
                             sections[index].selectedCategory?.id || null,
