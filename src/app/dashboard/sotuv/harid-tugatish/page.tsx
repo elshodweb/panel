@@ -237,12 +237,12 @@ const OrderPage = () => {
           <Modal
             isOpen={isConfirmDeleteOpen}
             onClose={() => setIsConfirmDeleteOpen(false)}
-            title="Mahsulotni o'chirish"
+            title="Holatni o'zgartirish"
           >
-            <p>Haqiqatan ham ushbu haridni o'chirishni istaysizmi?</p>
-            <button onClick={handleDelete}>O'chirish</button>
+            <p>Haqiqatan ham ushbu haridni holatini o'zgasrtirishni istaysizmi?</p>
+            <button onClick={handleDelete}>Ha</button>
             <button onClick={() => setIsConfirmDeleteOpen(false)}>
-              Bekor qilish
+              Yo'q
             </button>
           </Modal>
 

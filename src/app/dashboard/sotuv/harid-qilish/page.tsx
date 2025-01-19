@@ -19,7 +19,11 @@ import {
 } from "react-icons/fa";
 import { fetchCarServices } from "@/features/cars/cars";
 import axiosInstance from "@/utils/axiosInstance";
-import { DeliveryDetails, RentalDetails } from "../../../../../types";
+import {
+  ActionTypesEnum,
+  DeliveryDetails,
+  RentalDetails,
+} from "../../../../../types";
 import { useReactToPrint } from "react-to-print";
 import UserDataSummary from "@/components/Check/Check";
 
@@ -66,6 +70,7 @@ const Page = () => {
       price: 0,
       startDate: "",
       endDate: "",
+      unusedDays: 0,
     },
   ]);
   const { carServices, status, error } = useSelector(
@@ -90,7 +95,17 @@ const Page = () => {
       })
     );
   }, [dispatch, phone]);
-
+  const updateUnusedDays = (
+    index: number,
+    section: any,
+    unusedDays: number
+  ) => {
+    if (section.selectedProduct) {
+      const newSections = [...sections];
+      newSections[index].unusedDays = unusedDays;
+      setSections(newSections);
+    }
+  };
   const updateProducts = (
     index: number,
     categoryId: string | null,
@@ -164,6 +179,7 @@ const Page = () => {
         type: "",
         startDate: "",
         endDate: "",
+        unusedDays: 0,
       },
     ]);
   };
@@ -529,6 +545,22 @@ const Page = () => {
                       />
                     </div>
                   </div>
+
+                  <div className={styles.productRow}>
+                    <div className={styles.left}>
+                      <h4 className={styles.title}>Ishlatilmagan kunlar</h4>
+                      <TextField
+                        required
+                        size="small"
+                        type="number"
+                        variant="outlined"
+                        value={sections[index].unusedDays}
+                        onChange={(e) =>
+                          updateUnusedDays(index, section, +e.target.value)
+                        }
+                      />
+                    </div>
+                  </div>
                 </>
               )}
 
@@ -626,7 +658,6 @@ const Page = () => {
             onClick={() => {
               handlePrint();
             }}
-            
             className={styles.btnWithIcon}
             type="button"
             style={{ marginLeft: "auto", marginTop: 40 }}

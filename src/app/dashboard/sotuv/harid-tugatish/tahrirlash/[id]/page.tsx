@@ -36,7 +36,12 @@ const Page = () => {
     const response = await axiosInstance.get(`/order/one/${id}`);
     const data: any = response.data;
     setSelectedUser(data.user_id);
-    setDelivery(data.carServices);
+    setDelivery(
+      data.carServices.map((i: any) => ({
+        ...i,
+        action: ActionTypesEnum.UPDATE,
+      }))
+    );
     let products = data.orderProducts.map((i: any) => {
       const quantity =
         i.product_id.type == "dona" ? i.quantity_sold : i.measurement_sold;
@@ -49,7 +54,7 @@ const Page = () => {
       console.log("gftgftgft", i);
 
       return {
-        order_product_id: i.product_id.id,
+        order_product_id: i.id,
         selectedCategory: null,
         categoryTitle: "",
         selectedProduct: i.product_id,
@@ -63,7 +68,8 @@ const Page = () => {
         startDate: i.given_date,
         endDate: i.end_date,
         status: i.IsActive,
-        action: ActionTypesEnum.GET,
+        action: ActionTypesEnum.UPDATE,
+        unusedDays: i.unused_days,
       };
     });
 
@@ -85,7 +91,17 @@ const Page = () => {
       reactToPrintFn();
     }, 100);
   };
-
+  const updateUnusedDays = (
+    index: number,
+    section: any,
+    unusedDays: number
+  ) => {
+    if (section.selectedProduct) {
+      const newSections = [...sections];
+      newSections[index].unusedDays = unusedDays;
+      setSections(newSections);
+    }
+  };
   const {
     users,
     error: userError,
@@ -100,6 +116,9 @@ const Page = () => {
   const { products } = useSelector((state: RootState) => state.products);
   const [originalProducts, setOriginalProducts] = useState<any[]>([]);
   const [removedSections, setRemovedSections] = useState<RentalDetails[]>([]);
+  const [removedDeliveryCars, setRemovedDeliveryCars] = useState<
+    RentalDetails[]
+  >([]);
   const [sections, setSections] = useState<RentalDetails[]>([
     {
       selectedCategory: null,
@@ -114,7 +133,9 @@ const Page = () => {
       price: 0,
       startDate: "",
       endDate: "",
+      status: "Active",
       action: ActionTypesEnum.GET,
+      unusedDays: 0,
     },
   ]);
   const [delivery, setDelivery] = useState<DeliveryDetails[]>([
@@ -122,6 +143,7 @@ const Page = () => {
       comment: "",
       service_car_id: "",
       price: "",
+      action: ActionTypesEnum.CREATE,
     },
   ]);
   const [autocompleteProducts, setAutocompleteProducts] = useState(products);
@@ -179,7 +201,7 @@ const Page = () => {
       })
     ).then((response: any) => {
       if (response.payload) {
-        setOriginalProducts(response.payload.results); // Предполагается, что данные продуктов приходят в response.payload
+        setOriginalProducts(response.payload.results);
       }
     });
   }, [dispatch]);
@@ -210,7 +232,9 @@ const Page = () => {
         type: "",
         startDate: "",
         endDate: "",
+        status: "Active",
         action: ActionTypesEnum.CREATE,
+        unusedDays: 0,
       },
     ]);
   };
@@ -222,6 +246,7 @@ const Page = () => {
         comment: "",
         price: "",
         service_car_id: "",
+        action: ActionTypesEnum.CREATE,
       },
     ]);
   };
@@ -230,8 +255,11 @@ const Page = () => {
     if (sections.length > 1) {
       setSections((prev) =>
         prev.filter((el, i) => {
-          if (!(i !== index)) {
-            setRemovedSections((arr) => [...arr, el]);
+          if (i === index) {
+            setRemovedSections((arr) => [
+              ...arr,
+              { ...el, action: ActionTypesEnum.CREATE },
+            ]);
             return false;
           }
           return true;
@@ -242,7 +270,18 @@ const Page = () => {
 
   const handleRemoveDelivery = (index: number) => {
     if (delivery.length > 0) {
-      setDelivery((prev) => prev.filter((_, i) => i !== index));
+      setDelivery((prev) =>
+        prev.filter((el: any, i) => {
+          if (i === index) {
+            setRemovedDeliveryCars((p) => [
+              ...p,
+              { ...el, action: ActionTypesEnum.CREATE },
+            ]);
+            return false;
+          }
+          return true;
+        })
+      );
     }
   };
 
@@ -251,12 +290,11 @@ const Page = () => {
     newSections[index].selectedCategory = value;
     newSections[index].categoryTitle = value?.title || "";
     newSections[index].productTitle = "";
-    newSections[index].type = "";
-    newSections[index].price = 0;
-    newSections[index].action = newSections[index]?.action
-      ? ActionTypesEnum.CREATE
-      : ActionTypesEnum.UPDATE;
-    
+
+    newSections[index].action =
+      newSections[index]?.action === ActionTypesEnum.CREATE
+        ? ActionTypesEnum.CREATE
+        : ActionTypesEnum.UPDATE;
     newSections[index].selectedProduct = null;
 
     setSections(newSections);
@@ -274,24 +312,40 @@ const Page = () => {
         .toString(),
       paid_total: "0",
       products: sections.map((section: any) => {
-        console.log("asd", section.action);
+        console.log(section);
 
         return {
-          order_product_id: section.selectedProduct?.id || "",
+          product_id: section.selectedProduct?.id || "",
+          order_product_id: section.order_product_id || undefined,
           measurement_sold: section.quantity.toString(),
           quantity_sold: section.quantity.toString(),
           price_per_day: section.dailyPrice.toString(),
           status: section.status,
           action: section.action,
+          unused_days: section.unusedDays.toString(),
           ...(section.startDate.length
             ? { given_date: section.startDate }
             : {}),
           ...(section.endDate.length ? { end_date: section.endDate } : {}),
         };
       }),
-      service_car: delivery.length
-        ? delivery.map((i: any) => ({ ...i, service_car_id: i.id }))
-        : [],
+
+      service_car: [
+        ...[
+          ...(delivery.length
+            ? delivery.map((i: any) => ({ ...i, service_car_id: i.id }))
+            : []),
+        ],
+        ...[
+          ...(removedDeliveryCars.length
+            ? removedDeliveryCars.map((i: any) => ({
+                ...i,
+                service_car_id: i.id,
+                action: ActionTypesEnum.DELETE,
+              }))
+            : []),
+        ],
+      ],
     };
 
     try {
@@ -319,6 +373,11 @@ const Page = () => {
     newSections[index].totalPrice = value.price * sections[index].quantity;
     newSections[index].price = value.price;
     newSections[index].type = value.type;
+    newSections[index].action =
+      newSections[index].action === ActionTypesEnum.CREATE
+        ? ActionTypesEnum.CREATE
+        : ActionTypesEnum.UPDATE;
+    newSections[index].status = "Active";
     setSections(newSections);
   };
 
@@ -413,6 +472,7 @@ const Page = () => {
               id="user-selection-autocomplete"
               size="small"
               options={users}
+              disabled
               value={selectedUser}
               onChange={(event, value) => setSelectedUser(value)}
               getOptionLabel={(option: any) =>
@@ -597,6 +657,22 @@ const Page = () => {
                         value={section.endDate}
                         onChange={(e) =>
                           handleEndDateChange(index, e.target.value)
+                        }
+                      />
+                    </div>
+                  </div>
+
+                  <div className={styles.productRow}>
+                    <div className={styles.left}>
+                      <h4 className={styles.title}>Ishlatilmagan kunlar</h4>
+                      <TextField
+                        required
+                        size="small"
+                        type="number"
+                        variant="outlined"
+                        value={sections[index].unusedDays}
+                        onChange={(e) =>
+                          updateUnusedDays(index, section, +e.target.value)
                         }
                       />
                     </div>

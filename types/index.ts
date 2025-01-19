@@ -15,17 +15,25 @@ export type RentalDetails = {
   price: number;
   startDate: string;
   endDate: string;
-  action: ActionTypesEnum;
+  action?: ActionTypesEnum;
+  status?: string;
+  unusedDays: number;
 };
 
 export type DeliveryDetails = {
   price: string;
   comment: string;
-  service_car_id: string;
+  service_car_id?: string;
+  action?: ActionTypesEnum;
 };
 export enum ActionTypesEnum {
   GET = "get",
   CREATE = "create",
   UPDATE = "update",
   DELETE = "delete",
+}
+
+export enum IsActiveType {
+  ACTIVE = "active",
+  INACTIVE = "inactive",
 }

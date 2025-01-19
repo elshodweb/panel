@@ -1,6 +1,6 @@
 import React, { FC, useState } from "react";
 import styles from "./TableForOrders.module.scss";
-import { FaEdit, FaTrash, FaEye } from "react-icons/fa";
+import { FaEdit, FaTrash, FaEye, FaCheck } from "react-icons/fa";
 import Modal from "../Modal/Modal";
 import { useRouter } from "next/navigation";
 
@@ -83,12 +83,16 @@ const TableForOrders: FC<TableForOrdersProps> = ({
               <td className={styles.Item}>
                 <div className={styles.actions}>
                   <button
-                    onClick={() => navigate.push("/dashboard/sotuv/harid-tugatish/tahrirlash/" + row.id)}
+                    onClick={() =>
+                      navigate.push(
+                        "/dashboard/sotuv/harid-tugatish/tahrirlash/" + row.id
+                      )
+                    }
                   >
                     <FaEdit />
                   </button>
                   <button onClick={() => onDelete(row)}>
-                    <FaTrash />
+                    <FaCheck />
                   </button>
                   <button onClick={() => handleView(row)}>
                     <FaEye />
