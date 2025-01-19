@@ -63,6 +63,7 @@ const Page = () => {
         startDate: i.given_date,
         endDate: i.end_date,
         status: i.IsActive,
+        action: ActionTypesEnum.GET,
       };
     });
 
@@ -98,7 +99,7 @@ const Page = () => {
   );
   const { products } = useSelector((state: RootState) => state.products);
   const [originalProducts, setOriginalProducts] = useState<any[]>([]);
-
+  const [removedSections, setRemovedSections] = useState<RentalDetails[]>([]);
   const [sections, setSections] = useState<RentalDetails[]>([
     {
       selectedCategory: null,
@@ -227,7 +228,15 @@ const Page = () => {
 
   const handleRemoveSection = (index: number) => {
     if (sections.length > 1) {
-      setSections((prev) => prev.filter((_, i) => i !== index));
+      setSections((prev) =>
+        prev.filter((el, i) => {
+          if (!(i !== index)) {
+            setRemovedSections((arr) => [...arr, el]);
+            return false;
+          }
+          return true;
+        })
+      );
     }
   };
 
@@ -238,13 +247,16 @@ const Page = () => {
   };
 
   const handleChangeCategory = (index: number, value: any) => {
-    const newSections = [...sections];
+    const newSections: RentalDetails[] = [...sections];
     newSections[index].selectedCategory = value;
     newSections[index].categoryTitle = value?.title || "";
     newSections[index].productTitle = "";
     newSections[index].type = "";
     newSections[index].price = 0;
-
+    newSections[index].action = newSections[index]?.action
+      ? ActionTypesEnum.CREATE
+      : ActionTypesEnum.UPDATE;
+    
     newSections[index].selectedProduct = null;
 
     setSections(newSections);
@@ -262,7 +274,7 @@ const Page = () => {
         .toString(),
       paid_total: "0",
       products: sections.map((section: any) => {
-        console.log("asd", section);
+        console.log("asd", section.action);
 
         return {
           order_product_id: section.selectedProduct?.id || "",
@@ -270,7 +282,7 @@ const Page = () => {
           quantity_sold: section.quantity.toString(),
           price_per_day: section.dailyPrice.toString(),
           status: section.status,
-
+          action: section.action,
           ...(section.startDate.length
             ? { given_date: section.startDate }
             : {}),
