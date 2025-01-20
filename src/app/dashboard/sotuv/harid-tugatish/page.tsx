@@ -15,6 +15,7 @@ import Loader from "@/components/Loader/Loader";
 import Search from "@/components/Search/Search";
 import { FormControl, InputLabel, MenuItem, Select } from "@mui/material";
 import Modal from "@/components/Modal/Modal";
+import { CheckBox } from "@mui/icons-material";
 
 const Alert = forwardRef<HTMLDivElement, React.ComponentProps<typeof MuiAlert>>(
   function Alert(props, ref) {
@@ -45,7 +46,8 @@ const OrderPage = () => {
 
   const [isConfirmDeleteOpen, setIsConfirmDeleteOpen] = useState(false);
   const [selectedOrder, setSelectedOrder] = useState<any>(null);
-
+  const [isDebt, setIsDebt] = useState<boolean>(false);
+  const [debt,setDebt] =useState<boolean>()
   async function handleDelete() {
     try {
       const response = await axiosInstance.delete(
@@ -239,11 +241,12 @@ const OrderPage = () => {
             onClose={() => setIsConfirmDeleteOpen(false)}
             title="Holatni o'zgartirish"
           >
-            <p>Haqiqatan ham ushbu haridni holatini o'zgasrtirishni istaysizmi?</p>
+            <p>
+              Haqiqatan ham ushbu haridni holatini o'zgasrtirishni istaysizmi?
+            </p>
+            <CheckBox />
             <button onClick={handleDelete}>Ha</button>
-            <button onClick={() => setIsConfirmDeleteOpen(false)}>
-              Yo'q
-            </button>
+            <button onClick={() => setIsConfirmDeleteOpen(false)}>Yo'q</button>
           </Modal>
 
           <MyPagination

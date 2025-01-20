@@ -70,7 +70,7 @@ const TableForOrders: FC<TableForOrdersProps> = ({
 
               <td className={styles.Item}>
                 {" "}
-                {`${row.create_data.split("T")[0].replaceAll("-", ".")} `}
+                {` ${row.create_data.split("T")[0].replaceAll("-", ".")} `}
               </td>
 
               <td className={styles.Item}> {`${row.orderProducts.length} `}</td>
