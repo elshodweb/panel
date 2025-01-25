@@ -7,7 +7,6 @@ import Title from "@/components/Title/Title";
 import { RootState, AppDispatch } from "@/store/store";
 import { fetchOrdersWithFilter } from "@/features/order/orderWithFilter";
 import styles from "./styles.module.scss";
-import MyPagination from "@/components/Pagination/Pagination";
 import Snackbar from "@mui/material/Snackbar";
 import MuiAlert from "@mui/material/Alert";
 
@@ -249,9 +248,9 @@ const OrderPage = () => {
             <button onClick={() => setIsConfirmDeleteOpen(false)}>Yo'q</button>
           </Modal>
 
-          <MyPagination
-            currentPage={pagination.currentPage}
-            onPageChange={(event, page) => {
+          {/* <MyPagination */}
+            {/* // currentPage={pagination?.currentPage} */}
+            {/* onPageChange={(event, page) => {
               dispatch(
                 fetchOrdersWithFilter({
                   title: "",
@@ -268,7 +267,7 @@ const OrderPage = () => {
             pageSize={pageSize}
             setPageSize={setPageSize}
             totalPages={pagination.totalPages}
-          />
+          /> */}
         </>
       )}
     </div>
