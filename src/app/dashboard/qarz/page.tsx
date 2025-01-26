@@ -23,7 +23,6 @@ import {
 import { fetchUsers } from "@/features/users/users";
 import Loader from "@/components/Loader/Loader";
 
-// Component for notifications
 const Alert = forwardRef<HTMLDivElement, React.ComponentProps<typeof MuiAlert>>(
   function Alert(props, ref) {
     return <MuiAlert elevation={6} ref={ref} variant="filled" {...props} />;
@@ -107,12 +106,12 @@ const DebtPage = () => {
     setSelectedDebt(debt);
 
     setFormData({
-      user_id: debt.user_id.id || "",
-      comment: debt.comment,
-      dayGiven: debt.dayGiven,
-      dayToBeGiven: debt.dayToBeGiven,
-      isActive: debt.isActive,
-      remaining_debt: debt.remaining_debt,
+      user_id: debt?.user_id?.id || "",
+      comment: debt?.comment || "",
+      dayGiven: debt?.dayGiven || "",
+      dayToBeGiven: debt?.dayToBeGiven || "",
+      isActive: debt?.isActive || "",
+      remaining_debt: debt?.remaining_debt || "",
     });
     setIsModalOpen(true);
   };
@@ -181,7 +180,11 @@ const DebtPage = () => {
         </Alert>
       </Snackbar>
 
-      {status === "loading" && <p><Loader /> </p>}
+      {status === "loading" && (
+        <div>
+          <Loader />{" "}
+        </div>
+      )}
       {status === "failed" && <p>Error: {error}</p>}
       {status === "succeeded" && (
         <>
@@ -315,7 +318,7 @@ const DebtPage = () => {
                   label="User"
                   required
                 >
-                  {users.map((user,i) => (
+                  {users.map((user, i) => (
                     <MenuItem key={i} value={user.id}>
                       {user.first_name} {user.name} ({user.phone})
                     </MenuItem>
