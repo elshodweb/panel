@@ -244,7 +244,6 @@ const Page = () => {
 
     try {
       const response = await axiosInstance.post("/order/create", requestData);
-      console.log("Успешный ответ:", response.data);
     } catch (error: any) {
       console.error("Ошибка при отправке данных:", error);
       alert(

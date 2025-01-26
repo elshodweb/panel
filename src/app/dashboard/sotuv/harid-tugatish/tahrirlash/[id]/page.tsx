@@ -27,6 +27,7 @@ import {
 import { useReactToPrint } from "react-to-print";
 import UserDataSummary from "@/components/Check/Check";
 import { useParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 
 const Page = () => {
   const params = useParams();
@@ -51,7 +52,6 @@ const Page = () => {
         (endDate.getTime() - startDate.getTime()) / (1000 * 3600 * 24)
       );
       const totalPrice = i.product_id.price * quantity * rentalDays;
-      console.log("gftgftgft", i);
 
       return {
         order_product_id: i.id,
@@ -113,6 +113,8 @@ const Page = () => {
   const { categories } = useSelector(
     (state: RootState) => state.productCategories
   );
+  const navigate = useRouter();
+
   const { products } = useSelector((state: RootState) => state.products);
   const [originalProducts, setOriginalProducts] = useState<any[]>([]);
   const [removedSections, setRemovedSections] = useState<RentalDetails[]>([]);
@@ -312,8 +314,6 @@ const Page = () => {
         .toString(),
       paid_total: "0",
       products: sections.map((section: any) => {
-        console.log(section);
-
         return {
           product_id: section.selectedProduct?.id || "",
           order_product_id: section.order_product_id || undefined,
@@ -353,7 +353,6 @@ const Page = () => {
         "/order/update/" + id,
         requestData
       );
-      console.log("Успешный ответ:", response.data);
     } catch (error: any) {
       console.error("Ошибка при отправке данных:", error);
       alert(
@@ -361,6 +360,8 @@ const Page = () => {
           error.response?.data?.message || error.message
         }`
       );
+    } finally {
+      navigate.push("/dashboard/sotuv/harid-tugatish");
     }
   };
 
@@ -790,7 +791,7 @@ const Page = () => {
             style={{ marginLeft: 20, marginTop: 40 }}
           >
             <FaCartPlus size={22} />
-            <span>Sotish</span>
+            <span>Tahrirlash</span>
           </Button>
         </div>
 

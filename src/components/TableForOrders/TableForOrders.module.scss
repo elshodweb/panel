@@ -76,10 +76,12 @@
       background-color: #1e293b;
       color: white;
     }
-
     button:nth-child(2) {
       background-color: #00aa0b;
       color: white;
+    }
+    button.undo {
+      background: #ff0000;
     }
   }
 }

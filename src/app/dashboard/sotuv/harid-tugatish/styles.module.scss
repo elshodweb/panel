@@ -43,7 +43,16 @@
   border: 1px solid #ccc;
   border-radius: 4px;
 }
+.debt {
+  label {
+    display: block;
+    margin: 10px 0;
+  }
+}
 
+.input {
+  display: block;
+}
 @media (max-width: 530px) {
   .row {
     flex-wrap: wrap;

@@ -1,6 +1,6 @@
 import React, { FC, useState } from "react";
 import styles from "./TableForOrders.module.scss";
-import { FaEdit, FaTrash, FaEye, FaCheck } from "react-icons/fa";
+import { FaEdit, FaTrash, FaEye, FaCheck, FaUndo, FaAngellist, FaCheckDouble } from "react-icons/fa";
 import Modal from "../Modal/Modal";
 import { useRouter } from "next/navigation";
 
@@ -41,7 +41,6 @@ const TableForOrders: FC<TableForOrdersProps> = ({
     "Shafyor Soni",
     "Holati",
   ];
-  console.log(data);
 
   return (
     <div className={styles.tableWrapper}>
@@ -91,9 +90,17 @@ const TableForOrders: FC<TableForOrdersProps> = ({
                   >
                     <FaEdit />
                   </button>
-                  <button onClick={() => onDelete(row)}>
-                    <FaCheck />
-                  </button>
+                  {row.IsActive == 1 ? (
+                    <button onClick={() => onDelete(row)}>
+                      <FaCheck />
+                    </button>
+                  ) : (
+                    <button
+                      className={styles.undo}
+                    >
+                      <FaCheckDouble />
+                    </button>
+                  )}
                   <button onClick={() => handleView(row)}>
                     <FaEye />
                   </button>

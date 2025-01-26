@@ -13,9 +13,16 @@ import MuiAlert from "@mui/material/Alert";
 
 import Loader from "@/components/Loader/Loader";
 import Search from "@/components/Search/Search";
-import { FormControl, InputLabel, MenuItem, Select } from "@mui/material";
+import {
+  Checkbox,
+  FormControl,
+  InputLabel,
+  MenuItem,
+  Select,
+  TextField,
+} from "@mui/material";
 import Modal from "@/components/Modal/Modal";
-import { CheckBox } from "@mui/icons-material";
+import { format } from "date-fns";
 
 const Alert = forwardRef<HTMLDivElement, React.ComponentProps<typeof MuiAlert>>(
   function Alert(props, ref) {
@@ -28,7 +35,6 @@ const OrderPage = () => {
   const { orders, status, error, pagination } = useSelector(
     (state: RootState) => state.ordersWithFilter
   );
-  console.log(orders);
   const [search, setSearch] = useState("");
   const [id, setId] = useState("");
   const [nomer, setNomer] = useState<string | undefined>(undefined);
@@ -47,11 +53,32 @@ const OrderPage = () => {
   const [isConfirmDeleteOpen, setIsConfirmDeleteOpen] = useState(false);
   const [selectedOrder, setSelectedOrder] = useState<any>(null);
   const [isDebt, setIsDebt] = useState<boolean>(false);
-  const [debt,setDebt] =useState<boolean>()
+  const [debt, setDebt] = useState<any>({
+    remaining_debt: null,
+    comment: null,
+    isActive: "true",
+    dayToBeGiven: null,
+    dayGiven: format(new Date(), "yyyy-MM-dd"),
+  });
+
   async function handleDelete() {
     try {
-      const response = await axiosInstance.delete(
-        `/order/delete/${selectedOrder.id}`
+      const response = await axiosInstance.patch(
+        `/order/update-status/${selectedOrder.id}`,
+        {
+          status: "false",
+          debts: {
+            remaining_debt: debt.remaining_debt?.length
+              ? debt.remaining_debt
+              : null,
+            comment: debt.comment?.length ? debt.comment : null,
+            isActive: "true",
+            dayToBeGiven: debt.dayToBeGiven?.length ? debt.dayToBeGiven : null,
+            dayGiven: debt.dayGiven?.length
+              ? debt.dayGiven
+              : format(new Date(), "yyyy-MM-dd"),
+          },
+        }
       );
       if (response.status >= 200 && response.status < 300) {
         dispatch(
@@ -72,6 +99,14 @@ const OrderPage = () => {
       }
     } catch (error) {
       showSnackbar("Error occurred while deleting order", "error");
+    } finally {
+      setDebt({
+        remaining_debt: null,
+        comment: null,
+        isActive: "true",
+        dayToBeGiven: null,
+        dayGiven: format(new Date(), "yyyy-MM-dd"),
+      });
     }
     setSelectedOrder(null);
     setIsConfirmDeleteOpen(false);
@@ -127,26 +162,6 @@ const OrderPage = () => {
           />
         </div>
 
-        {/* <LocalizationProvider dateAdapter={AdapterDateFns}>
-          <DatePicker
-            label="Boshlanish sanasi"
-            value={startDate}
-            onChange={(newValue) => setStartDate(newValue)}
-            renderInput={(params) => (
-              <input {...params.inputProps} className={styles.datePicker} />
-            )}
-          />
-          <DatePicker
-            label="Tugash sanasi"
-            value={endDate}
-            onChange={(newValue) => setEndDate(newValue)}
-            renderInput={(params) => (
-              <input {...params.inputProps} className={styles.datePicker} />
-            )}
-          /> */}
-        {/* </LocalizationProvider> */}
-
-        {/* Search component for nomer and name */}
         <FormControl size="small" className={styles.select} fullWidth>
           <InputLabel id="is-active-label">Holatini tanlang</InputLabel>
           <Select
@@ -191,7 +206,7 @@ const OrderPage = () => {
             }
             setSearch(value);
           }}
-          placeholder="Qidirish (Nomi, Id)"
+          placeholder="Qidirish (Nomi, Telefon)"
           onClick={() => {
             dispatch(
               fetchOrdersWithFilter({
@@ -239,12 +254,58 @@ const OrderPage = () => {
           <Modal
             isOpen={isConfirmDeleteOpen}
             onClose={() => setIsConfirmDeleteOpen(false)}
-            title="Holatni o'zgartirish"
+            title="Haridni yakunlash"
           >
-            <p>
-              Haqiqatan ham ushbu haridni holatini o'zgasrtirishni istaysizmi?
-            </p>
-            <CheckBox />
+            <p>Haqiqatan ham ushbu haridni yakunlashni istaysizmi?</p>
+            <label>
+              <Checkbox onChange={() => setIsDebt(!isDebt)} value={isDebt} />
+              Qarz qoldirish
+            </label>
+
+            {isDebt && (
+              <div className={styles.debt}>
+                <label>Qarz qoldirilgan summa:</label>
+                <TextField
+                  className={styles.input}
+                  fullWidth={true}
+                  type="number"
+                  value={debt.remaining_debt}
+                  onChange={(e) =>
+                    setDebt({ ...debt, remaining_debt: e.target.value })
+                  }
+                />
+                <label>Qarz qoldirish kuni:</label>
+                <TextField
+                  className={styles.input}
+                  fullWidth={true}
+                  type="date"
+                  value={debt.dayToBeGiven}
+                  onChange={(e) =>
+                    setDebt({ ...debt, dayToBeGiven: e.target.value })
+                  }
+                />
+                <label>Qarz qoldirilgan kun:</label>
+                <TextField
+                  className={styles.input}
+                  fullWidth={true}
+                  type="date"
+                  value={debt.dayGiven}
+                  onChange={(e) =>
+                    setDebt({ ...debt, dayGiven: e.target.value })
+                  }
+                />
+                <label>Izoh:</label>
+                <TextField
+                  className={styles.input}
+                  fullWidth={true}
+                  type="text"
+                  value={debt.comment}
+                  onChange={(e) =>
+                    setDebt({ ...debt, comment: e.target.value })
+                  }
+                />
+              </div>
+            )}
             <button onClick={handleDelete}>Ha</button>
             <button onClick={() => setIsConfirmDeleteOpen(false)}>Yo'q</button>
           </Modal>
