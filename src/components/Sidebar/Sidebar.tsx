@@ -14,6 +14,9 @@ import {
   FaTags,
   FaCheck,
   FaSignOutAlt,
+  FaChartArea,
+  FaChartBar,
+  FaChartLine,
 } from "react-icons/fa";
 import { MdCancelPresentation } from "react-icons/md";
 import styles from "./Sidebar.module.scss";
@@ -72,9 +75,9 @@ const Sidebar: FC<SidebarProps> = ({ selected, setSelected }) => {
   const menuItems: MenuItem[] = [
     {
       id: 1,
-      name: "Products",
+      name: "Maxsulotlar",
       icon: <FaBox />,
-      key: "products",
+      key: "maxsulotlar",
       children: [
         {
           id: 11,
@@ -85,19 +88,12 @@ const Sidebar: FC<SidebarProps> = ({ selected, setSelected }) => {
         },
         {
           id: 12,
-          name: "Products",
+          name: "Maxsulotlar",
           icon: <FaClipboardList />,
           key: "product-list",
           href: "/dashboard/products/list",
         },
       ],
-    },
-    {
-      id: 2,
-      name: "Users",
-      icon: <FaUsers />,
-      key: "users",
-      href: "/dashboard/users",
     },
     {
       id: 3,
@@ -120,6 +116,42 @@ const Sidebar: FC<SidebarProps> = ({ selected, setSelected }) => {
           href: "/dashboard/sotuv/harid-tugatish",
         },
       ],
+    },
+    {
+      id: 3,
+      name: "Statistika",
+      icon: <FaChartBar />,
+      key: "statistics",
+      children: [
+        {
+          id: 6,
+          name: "Yetkazib berish",
+          icon: <FaCar />,
+          key: "yetkazib-berish-statistikasi",
+          href: "/dashboard/statistics/car-service",
+        },
+        {
+          id: 5,
+          name: "Qarz",
+          icon: <FaMoneyBillWave />,
+          key: "qarz-statistikasi",
+          href: "/dashboard/statistics/debt",
+        },
+        {
+          id: 5,
+          name: "Buyurtmalar",
+          icon: <FaTags />,
+          key: "buyurtmalar-statistikasi",
+          href: "/dashboard/statistics/order",
+        },
+      ],
+    },
+    {
+      id: 2,
+      name: "Foydalanuvchilar",
+      icon: <FaUsers />,
+      key: "users",
+      href: "/dashboard/users",
     },
     {
       id: 4,
