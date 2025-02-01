@@ -187,7 +187,7 @@ const CarServicePage = () => {
   return (
     <div className={styles.wrapper}>
       <div className={styles.row}>
-        <Title>Avtoservislar</Title>
+        <Title>Mashinalar</Title>
         <div className={styles.right}>
           <AddBtn onClick={handleCreate} />
           <FormControl size="small" className={styles.select} fullWidth>
