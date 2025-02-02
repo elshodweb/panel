@@ -20,8 +20,8 @@ const LoginPage = () => {
         password,
       });
       const { token, role } = response.data;
-      localStorage.setItem("token", token);
-      localStorage.setItem("role", role);
+      localStorage?.setItem("token", token);
+      localStorage?.setItem("role", role);
       setPhone("");
       setPassword("");
       setError("");
@@ -36,8 +36,8 @@ const LoginPage = () => {
     }
   };
   useEffect(() => {
-    const token = localStorage.getItem("token");
-    const role = localStorage.getItem("role");
+    const token = localStorage?.getItem("token");
+    const role = localStorage?.getItem("role");
 
     if (token) {
       if (role === "admin") {

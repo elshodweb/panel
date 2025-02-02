@@ -43,7 +43,7 @@ const Sidebar: FC<SidebarProps> = ({ selected, setSelected }) => {
     {}
   );
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const role = localStorage.getItem("role");
+  const role = localStorage?.getItem("role");
   const toggleSection = (key: string) => {
     setOpenSections((prev) => ({
       ...prev,
@@ -68,7 +68,7 @@ const Sidebar: FC<SidebarProps> = ({ selected, setSelected }) => {
   }, [isOpen]);
 
   const handleLogout = () => {
-    localStorage.removeItem("token");
+    localStorage?.removeItem("token");
     router.push("/login");
   };
 

@@ -3,7 +3,7 @@ import axios from "axios";
 // Функция для получения токена из localStorage
 const getToken = (): string | null => {
   try {
-    return localStorage.getItem("token");
+    return localStorage?.getItem("token");
   } catch (error) {
     console.error("Ошибка при получении токена из localStorage:", error);
     return null;

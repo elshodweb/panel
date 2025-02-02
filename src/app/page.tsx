@@ -7,8 +7,8 @@ const Home: React.FC = () => {
   const router = useRouter(); // Используем useRouter для перенаправления
 
   useEffect(() => {
-    const token = localStorage.getItem("token");
-    const role = localStorage.getItem("role");
+    const token = localStorage?.getItem("token");
+    const role = localStorage?.getItem("role");
 
     if (token) {
       if (role === "admin") {

@@ -9,12 +9,12 @@ const AuthRedirect: React.FC = () => {
   const [loading, setLoading] = useState(true); // Состояние загрузки
 
   useEffect(() => {
-    const token = localStorage.getItem("token");
+    const token = localStorage?.getItem("token");
 
     if (!token) {
       router.push("/login");
     }
-    
+
     setLoading(false); // Устанавливаем загрузку в false после проверки
   }, [router]);
 
