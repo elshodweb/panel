@@ -15,11 +15,12 @@ import { Snackbar, TextField } from "@mui/material";
 import MuiAlert from "@mui/material/Alert";
 import Image from "next/image";
 import Loader from "@/components/Loader/Loader";
+import Link from "next/link";
 
 const CircularImage = ({ src }: { src: string }) => (
-  <div className={styles.circularImage}>
+  <Link target="_blank" href={src} className={styles.circularImage}>
     <Image width={50} height={50} src={src} alt="User" />
-  </div>
+  </Link>
 );
 
 const Alert = forwardRef<HTMLDivElement, React.ComponentProps<typeof MuiAlert>>(
@@ -47,6 +48,7 @@ const UsersPage = () => {
   const [search, setSearch] = useState("");
   const [pageSize, setPageSize] = useState(10);
   const [currentPage, setCurrentPage] = useState(1);
+  const [avatar, setAvatar] = useState<File | null>(null);
 
   useEffect(() => {
     dispatch(
@@ -73,15 +75,31 @@ const UsersPage = () => {
   const handleUpdate = (user: any) => {
     setSelectedUser(user);
     setIsModalOpen(true);
+    setIsEditMode(true);
   };
 
   const handleCreate = () => {
     setSelectedUser(null);
     setIsModalOpen(true);
   };
+  console.log(isEditMode);
 
   const handleFormSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    const formData = new FormData();
+    formData.append("first_name", selectedUser?.first_name || "");
+    formData.append("name", selectedUser?.name || "");
+    formData.append("last_name", selectedUser?.last_name || "");
+    formData.append("comment", selectedUser?.comment || "");
+    formData.append("phone", selectedUser?.phone || "");
+    formData.append("role", selectedUser?.role || "");
+    formData.append("password", selectedUser?.password || "");
+
+    if (avatar) {
+      formData.append("image", avatar);
+    }
+
     const endpoint = isEditMode
       ? `/Auth/user/update/${selectedUser.id}`
       : "/Auth/user/register";
@@ -90,7 +108,10 @@ const UsersPage = () => {
       const response = await axiosInstance({
         method: isEditMode ? "patch" : "post",
         url: endpoint,
-        data: { ...selectedUser },
+        data: formData,
+        headers: {
+          "Content-Type": "multipart/form-data", // Указываем правильный тип контента
+        },
       });
 
       if (response.status < 300) {
@@ -196,10 +217,7 @@ const UsersPage = () => {
               id: user.id,
               image: (
                 <CircularImage
-                  src={
-                    "https://storage.googleapis.com/control_business/" +
-                    user.image
-                  }
+                  src={user?.img?.includes("https") ? user.img : "/profile.jpg"}
                 />
               ),
               first_name: user.first_name,
@@ -330,6 +348,19 @@ const UsersPage = () => {
                 }
                 required
               />
+              <TextField
+                className={styles.autocompleteModal}
+                size="small"
+                fullWidth
+                type="file"
+                onChange={(e: any) => {
+                  const file = e.target.files?.[0];
+                  if (file) {
+                    setAvatar(file);
+                  }
+                }}
+              />
+
               <button type="submit">Saqlash</button>
             </form>
           </Modal>

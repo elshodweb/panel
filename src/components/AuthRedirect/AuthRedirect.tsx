@@ -14,6 +14,7 @@ const AuthRedirect: React.FC = () => {
     if (!token) {
       router.push("/login");
     }
+    
     setLoading(false); // Устанавливаем загрузку в false после проверки
   }, [router]);
 

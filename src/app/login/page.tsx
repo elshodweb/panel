@@ -1,5 +1,5 @@
 "use client";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Button, TextField, Box, Typography, Paper } from "@mui/material";
 import { AiFillLock } from "react-icons/ai";
 import axiosInstance from "@/utils/axiosInstance";
@@ -19,21 +19,38 @@ const LoginPage = () => {
         phone,
         password,
       });
-      const { token } = response.data;
+      const { token, role } = response.data;
       localStorage.setItem("token", token);
+      localStorage.setItem("role", role);
       setPhone("");
       setPassword("");
       setError("");
-
-
-      // Перенаправление на другую страницу
-      router.push("/dashboard/products/categories");
+      if (role === "admin") {
+        router.push("/dashboard/statistics/car-service");
+      } else if (role === "user") {
+        router.push("/dashboard/products/categories");
+      }
     } catch (err) {
       setError("Noto'g'ri telefon raqami yoki parol. Qayta urinib ko'ring.");
       console.error(err);
     }
   };
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    const role = localStorage.getItem("role");
 
+    if (token) {
+      if (role === "admin") {
+        router.push("/dashboard/statistics/car-service");
+      } else if (role === "user") {
+        router.push("/dashboard/products/categories");
+      } else {
+        router.push("/login");
+      }
+    } else {
+      router.push("/login");
+    }
+  });
   return (
     <Box
       display="flex"

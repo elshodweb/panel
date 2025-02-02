@@ -43,7 +43,7 @@ const Sidebar: FC<SidebarProps> = ({ selected, setSelected }) => {
     {}
   );
   const [isModalOpen, setIsModalOpen] = useState(false);
-
+  const role = localStorage.getItem("role");
   const toggleSection = (key: string) => {
     setOpenSections((prev) => ({
       ...prev,
@@ -72,102 +72,98 @@ const Sidebar: FC<SidebarProps> = ({ selected, setSelected }) => {
     router.push("/login");
   };
 
-  const menuItems: MenuItem[] = [
-    {
-      id: 1,
-      name: "Maxsulotlar",
-      icon: <FaBox />,
-      key: "maxsulotlar",
-      children: [
-        {
-          id: 2,
-          name: "Pr. Categories",
-          icon: <FaTags />,
-          key: "product-categories",
-          href: "/dashboard/products/categories",
-        },
-        {
-          id: 3,
-          name: "Maxsulotlar",
-          icon: <FaClipboardList />,
-          key: "product-list",
-          href: "/dashboard/products/list",
-        },
-      ],
-    },
-    {
-      id: 4,
-      name: "Sotuv",
-      icon: <FaShoppingCart />,
-      key: "sotuv",
-      children: [
-        {
-          id: 5,
-          name: "Harid qilish",
-          icon: <FaCheck />,
-          key: "harid-qilish",
-          href: "/dashboard/sotuv/harid-qilish",
-        },
-        {
-          id: 6,
-          name: "Haridni tugatish",
-          icon: <MdCancelPresentation />,
-          key: "harid-tugatish",
-          href: "/dashboard/sotuv/harid-tugatish",
-        },
-      ],
-    },
-    {
-      id: 7,
-      name: "Statistika",
-      icon: <FaChartBar />,
-      key: "statistics",
-      children: [
-        {
-          id: 8,
-          name: "Yetkazib berish",
-          icon: <FaCar />,
-          key: "yetkazib-berish-statistikasi",
-          href: "/dashboard/statistics/car-service",
-        },
-        {
-          id: 9,
-          name: "Qarz",
-          icon: <FaMoneyBillWave />,
-          key: "qarz-statistikasi",
-          href: "/dashboard/statistics/debt",
-        },
-        {
-          id: 10,
-          name: "Buyurtmalar",
-          icon: <FaTags />,
-          key: "buyurtmalar-statistikasi",
-          href: "/dashboard/statistics/order",
-        },
-      ],
-    },
-    {
-      id: 11,
-      name: "Foydalanuvchilar",
-      icon: <FaUsers />,
-      key: "users",
-      href: "/dashboard/users",
-    },
-    {
-      id: 12,
-      name: "Qarz",
-      icon: <FaMoneyBillWave />,
-      key: "qarz",
-      href: "/dashboard/qarz",
-    },
-    {
-      id: 13,
-      name: "Mashina",
-      icon: <FaCar />,
-      key: "mashina",
-      href: "/dashboard/mashina",
-    },
-  ];
+  const menuItems: MenuItem[] =
+    role === "user"
+      ? [
+          {
+            id: 1,
+            name: "Maxsulotlar",
+            icon: <FaBox />,
+            key: "maxsulotlar",
+            children: [
+              {
+                id: 2,
+                name: "Pr. Categories",
+                icon: <FaTags />,
+                key: "product-categories",
+                href: "/dashboard/products/categories",
+              },
+              {
+                id: 3,
+                name: "Maxsulotlar",
+                icon: <FaClipboardList />,
+                key: "product-list",
+                href: "/dashboard/products/list",
+              },
+            ],
+          },
+          {
+            id: 4,
+            name: "Sotuv",
+            icon: <FaShoppingCart />,
+            key: "sotuv",
+            children: [
+              {
+                id: 5,
+                name: "Harid qilish",
+                icon: <FaCheck />,
+                key: "harid-qilish",
+                href: "/dashboard/sotuv/harid-qilish",
+              },
+              {
+                id: 6,
+                name: "Haridni tugatish",
+                icon: <MdCancelPresentation />,
+                key: "harid-tugatish",
+                href: "/dashboard/sotuv/harid-tugatish",
+              },
+            ],
+          },
+          {
+            id: 11,
+            name: "Foydalanuvchilar",
+            icon: <FaUsers />,
+            key: "users",
+            href: "/dashboard/users",
+          },
+          {
+            id: 12,
+            name: "Qarz",
+            icon: <FaMoneyBillWave />,
+            key: "qarz",
+            href: "/dashboard/qarz",
+          },
+          {
+            id: 13,
+            name: "Mashina",
+            icon: <FaCar />,
+            key: "mashina",
+            href: "/dashboard/mashina",
+          },
+        ]
+      : [
+          {
+            id: 8,
+            name: "Mashina",
+            icon: <FaCar />,
+            key: "yetkazib-berish-statistikasi",
+            href: "/dashboard/statistics/car-service",
+          },
+          {
+            id: 9,
+            name: "Qarz",
+            icon: <FaMoneyBillWave />,
+            key: "qarz-statistikasi",
+            href: "/dashboard/statistics/debt",
+          },
+          {
+            id: 10,
+            name: "Buyurtmalar",
+            icon: <FaTags />,
+            key: "buyurtmalar-statistikasi",
+            href: "/dashboard/statistics/order",
+          },
+        ];
 
   const router = useRouter();
 
