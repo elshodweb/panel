@@ -42,8 +42,9 @@ const Sidebar: FC<SidebarProps> = ({ selected, setSelected }) => {
   const [openSections, setOpenSections] = useState<{ [key: string]: boolean }>(
     {}
   );
+  const [role, setRole] = useState<string>("");
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const role = localStorage?.getItem("role");
+
   const toggleSection = (key: string) => {
     setOpenSections((prev) => ({
       ...prev,
@@ -66,7 +67,12 @@ const Sidebar: FC<SidebarProps> = ({ selected, setSelected }) => {
       document.removeEventListener("click", handleOutsideClick);
     };
   }, [isOpen]);
-
+  useEffect(() => {
+    const role = localStorage?.getItem("role");
+    if (role) {
+      setRole(role);
+    }
+  });
   const handleLogout = () => {
     localStorage?.removeItem("token");
     router.push("/login");
