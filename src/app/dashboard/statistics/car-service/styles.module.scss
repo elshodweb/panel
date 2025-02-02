@@ -43,17 +43,34 @@
   border: 1px solid #ccc;
   border-radius: 4px;
 }
-@media (max-width: 530px) {
+.select {
+  width: 200px;
+}
+.filters {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  width: 100%;
+  align-items: flex-end;
+}
+@media (max-width: 924px) {
   .row {
     flex-wrap: wrap;
-    padding: 5px;
+    padding: 10px;
   }
-
-  .right {
+  .filters{
     justify-content: flex-start;
   }
-
   .wrapper {
     padding-top: 100px;
+  }
+}
+
+@media (max-width:610px) {
+  .filters{
+    flex-wrap: wrap;
+  }
+  .wrapper {
+    padding-top: 200px;
   }
 }
