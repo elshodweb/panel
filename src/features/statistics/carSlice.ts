@@ -1,4 +1,3 @@
-// src/features/statistics/statisticsSlice.ts
 import { createSlice, createAsyncThunk, PayloadAction } from "@reduxjs/toolkit";
 import axiosInstance from "@/utils/axiosInstance"; // Assuming axios instance is correctly configured
 
@@ -34,6 +33,11 @@ interface CarServiceState {
     totalProfit: number;
     totalExpense: number;
   };
+  filters: {
+    isActive: string | null;
+    startDate: string | null;
+    endDate: string | null;
+  };
 }
 
 const initialState: CarServiceState = {
@@ -50,14 +54,27 @@ const initialState: CarServiceState = {
     totalProfit: 0,
     totalExpense: 0,
   },
+  filters: {
+    isActive: null,
+    startDate: null,
+    endDate: null,
+  },
 };
 
-export const fetchCarServiceStatistics = createAsyncThunk<ApiResponse, { pageNumber: number; pageSize: number }>(
+// Fetch Car Service Statistics with additional filters
+export const fetchCarServiceStatistics = createAsyncThunk<ApiResponse, { pageNumber: number; pageSize: number; isActive?: string; startDate?: string; endDate?: string }>(
   "carService/fetchStatistics",
-  async ({ pageNumber, pageSize }) => {
+  async ({ pageNumber, pageSize, isActive, startDate, endDate }) => {
     const response = await axiosInstance.get<ApiResponse>("/car-service/statistic", {
-      params: { pageNumber, pageSize },
+      params: {
+        pageNumber,
+        pageSize,
+        isActive,
+        startDate,
+        endDate,
+      },
     });
+    
     return response.data;
   }
 );
@@ -65,7 +82,14 @@ export const fetchCarServiceStatistics = createAsyncThunk<ApiResponse, { pageNum
 const carServiceSlice = createSlice({
   name: "carService",
   initialState,
-  reducers: {},
+  reducers: {
+    setFilters: (state, action: PayloadAction<{ isActive?: string; startDate?: string; endDate?: string }>) => {
+      const { isActive, startDate, endDate } = action.payload;
+      if (isActive) state.filters.isActive = isActive;
+      if (startDate) state.filters.startDate = startDate;
+      if (endDate) state.filters.endDate = endDate;
+    },
+  },
   extraReducers: (builder) => {
     builder
       .addCase(fetchCarServiceStatistics.pending, (state) => {
@@ -87,5 +111,7 @@ const carServiceSlice = createSlice({
       });
   },
 });
+
+export const { setFilters } = carServiceSlice.actions;
 
 export default carServiceSlice.reducer;

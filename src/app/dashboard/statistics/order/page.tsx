@@ -8,23 +8,38 @@ import Snackbar from "@mui/material/Snackbar";
 import MuiAlert from "@mui/material/Alert";
 import TableStatistics from "@/components/TableStatistics/TableStatistics";
 import MyPagination from "@/components/Pagination/Pagination";
+import styles from "./styles.module.scss";
 
+import { FormControl, InputLabel, MenuItem, Select } from "@mui/material";
 const OrderStatisticsPage = () => {
   const dispatch = useDispatch<AppDispatch>();
   const { orders, status, error, totals, pagination } = useSelector(
     (state: RootState) => state.orderStatistics
   );
+  const [isActive, setIsActive] = useState<boolean | undefined>(undefined);
+  const [startDate, setStartDate] = useState<string | undefined>(undefined);
+  const [endDate, setEndDate] = useState<string | undefined>(undefined);
 
   const [snackbarOpen, setSnackbarOpen] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState("");
-  const [snackbarSeverity, setSnackbarSeverity] = useState<"success" | "error">("success");
+  const [snackbarSeverity, setSnackbarSeverity] = useState<"success" | "error">(
+    "success"
+  );
 
   const [pageSize, setPageSize] = useState(10);
   const [currentPage, setCurrentPage] = useState(1);
 
   useEffect(() => {
-    dispatch(fetchOrders({ pageNumber: currentPage, pageSize }));
-  }, [dispatch, currentPage, pageSize]);
+    dispatch(
+      fetchOrders({
+        pageNumber: currentPage,
+        pageSize,
+        isActive: isActive?.toString(),
+        startDate,
+        endDate,
+      })
+    );
+  }, [dispatch, currentPage, pageSize, isActive, startDate, endDate]);
 
   useEffect(() => {
     if (error) {
@@ -39,10 +54,48 @@ const OrderStatisticsPage = () => {
   };
 
   return (
-    <div>
-      <Title>Buyurtma Statistikasi</Title>
-
-      <Snackbar open={snackbarOpen} autoHideDuration={6000} onClose={handleSnackbarClose}>
+    <div className={styles.wrapper}>
+      <div className={styles.row}>
+        <Title>Buyurtma Statistikasi</Title>
+        <div className={styles.datePicker}>
+          <label>Boshlanish sanasi:</label>
+          <input
+            type="date"
+            value={startDate || ""}
+            onChange={(e) => setStartDate(e.target.value || undefined)}
+          />
+        </div>
+        <div className={styles.datePicker}>
+          <label>Tugash sanasi:</label>
+          <input
+            type="date"
+            value={endDate || ""}
+            onChange={(e) => setEndDate(e.target.value || undefined)}
+          />
+        </div>
+        <FormControl size="small" className={styles.select} fullWidth>
+          <InputLabel id="is-active-label">Holatini tanlang</InputLabel>
+          <Select
+            labelId="is-active-label"
+            value={isActive !== undefined ? isActive.toString() : ""}
+            onChange={(e) =>
+              setIsActive(
+                e.target.value === "" ? undefined : e.target.value === "true"
+              )
+            }
+            label="Holatini tanlang"
+          >
+            <MenuItem value="">Barchasi</MenuItem>
+            <MenuItem value="true">Faol</MenuItem>
+            <MenuItem value="false">Faol emas</MenuItem>
+          </Select>
+        </FormControl>
+      </div>
+      <Snackbar
+        open={snackbarOpen}
+        autoHideDuration={6000}
+        onClose={handleSnackbarClose}
+      >
         <MuiAlert onClose={handleSnackbarClose} severity={snackbarSeverity}>
           {snackbarMessage}
         </MuiAlert>

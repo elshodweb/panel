@@ -36,6 +36,11 @@ interface DebtState {
   error: string | null;
   pagination: Pagination;
   totals: Totals;
+  filters: {
+    isActive: string | null;
+    startDate: string | null;
+    endDate: string | null;
+  };
 }
 
 const initialState: DebtState = {
@@ -52,14 +57,25 @@ const initialState: DebtState = {
     totalActiveDebtSum: 0,
     totalNotActiveDebtSum: 0,
   },
+  filters: {
+    isActive: null,
+    startDate: null,
+    endDate: null,
+  },
 };
 
-// Fetch Debt Statistics
-export const fetchDebts = createAsyncThunk<ApiResponse, { pageNumber: number; pageSize: number }>(
+// Fetch Debt Statistics with additional filters
+export const fetchDebts = createAsyncThunk<ApiResponse, { pageNumber: number; pageSize: number; isActive?: string; startDate?: string; endDate?: string }>(
   'debts/fetchDebts',
-  async ({ pageNumber, pageSize }) => {
+  async ({ pageNumber, pageSize, isActive, startDate, endDate }) => {
     const response = await axiosInstance.get<ApiResponse>('/debt/statistic', {
-      params: { pageNumber, pageSize },
+      params: {
+        pageNumber,
+        pageSize,
+        isActive,
+        startDate,
+        endDate,
+      },
     });
     return response.data;
   }
@@ -68,7 +84,14 @@ export const fetchDebts = createAsyncThunk<ApiResponse, { pageNumber: number; pa
 const debtSlice = createSlice({
   name: 'debts',
   initialState,
-  reducers: {},
+  reducers: {
+    setFilters: (state, action: PayloadAction<{ isActive?: string; startDate?: string; endDate?: string }>) => {
+      const { isActive, startDate, endDate } = action.payload;
+      if (isActive) state.filters.isActive = isActive;
+      if (startDate) state.filters.startDate = startDate;
+      if (endDate) state.filters.endDate = endDate;
+    },
+  },
   extraReducers: (builder) => {
     builder
       .addCase(fetchDebts.pending, (state) => {
@@ -87,5 +110,7 @@ const debtSlice = createSlice({
       });
   },
 });
+
+export const { setFilters } = debtSlice.actions;
 
 export default debtSlice.reducer;

@@ -7,7 +7,7 @@ import carServiceReducer from "@/features/cars/cars";
 import debtReducer from "@/features/debt/debt"; // Импортируйте debtSlice.reducer
 import orderReducer from "@/features/order/order"; // Импортируйте orderSlice.reducer
 import ordersWithFilterReducer from "@/features/order/orderWithFilter"; // Импортируйте orderSlice.reducer
-import carServiceStatisticsReducer from "@/features/statistics/statisticsLice"; // Импортируйте orderSlice.reducer
+import carServiceStatisticsReducer from "@/features/statistics/carSlice"; // Импортируйте orderSlice.reducer
 import debtStatisticsReducer from "@/features/statistics/debtSlice"; // Импортируйте orderSlice.reducer
 import orderStatisticsReducer from "@/features/statistics/orderSlice"; // Импортируйте orderSlice.reducer
 

@@ -36,6 +36,11 @@ interface OrderState {
   error: string | null;
   pagination: Pagination;
   totals: Totals;
+  filters: {
+    isActive: string | null;
+    startDate: string | null;
+    endDate: string | null;
+  };
 }
 
 const initialState: OrderState = {
@@ -52,14 +57,25 @@ const initialState: OrderState = {
     totalPriceSum: 0,
     totalPaidSum: 0,
   },
+  filters: {
+    isActive: null,
+    startDate: null,
+    endDate: null,
+  },
 };
 
-// Fetch Order Statistics
-export const fetchOrders = createAsyncThunk<ApiResponse, { pageNumber: number; pageSize: number }>(
+// Fetch Order Statistics with additional filters
+export const fetchOrders = createAsyncThunk<ApiResponse, { pageNumber: number; pageSize: number; isActive?: string; startDate?: string; endDate?: string }>(
   'orders/fetchOrders',
-  async ({ pageNumber, pageSize }) => {
+  async ({ pageNumber, pageSize, isActive, startDate, endDate }) => {
     const response = await axiosInstance.get<ApiResponse>('/order/statistic', {
-      params: { pageNumber, pageSize },
+      params: {
+        pageNumber,
+        pageSize,
+        isActive,
+        startDate,
+        endDate,
+      },
     });
     return response.data;
   }
@@ -68,7 +84,14 @@ export const fetchOrders = createAsyncThunk<ApiResponse, { pageNumber: number; p
 const orderSlice = createSlice({
   name: 'orders',
   initialState,
-  reducers: {},
+  reducers: {
+    setFilters: (state, action: PayloadAction<{ isActive?: string; startDate?: string; endDate?: string }>) => {
+      const { isActive, startDate, endDate } = action.payload;
+      if (isActive) state.filters.isActive = isActive;
+      if (startDate) state.filters.startDate = startDate;
+      if (endDate) state.filters.endDate = endDate;
+    },
+  },
   extraReducers: (builder) => {
     builder
       .addCase(fetchOrders.pending, (state) => {
@@ -87,5 +110,7 @@ const orderSlice = createSlice({
       });
   },
 });
+
+export const { setFilters } = orderSlice.actions;
 
 export default orderSlice.reducer;

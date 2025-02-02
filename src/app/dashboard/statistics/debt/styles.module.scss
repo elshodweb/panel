@@ -1,0 +1,60 @@
+.wrapper {
+    padding-top: 70px;
+  }
+  
+  .row {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    margin-bottom: 10px;
+    position: fixed;
+    top: 0px;
+    width: calc(100% - 80px);
+    background: #fff;
+    z-index: 2;
+    padding: 15px;
+    gap: 10px;
+  }
+  
+  .select {
+    max-width: 300px;
+  }
+  .right {
+    display: flex;
+    gap: 5px;
+    justify-content: flex-end;
+    width: 100%;
+  }
+  
+  .datePicker {
+    display: flex;
+    flex-direction: column;
+    margin-right: 16px;
+  }
+  
+  .datePicker label {
+    margin-bottom: 4px;
+    font-size: 14px;
+  }
+  
+  .datePicker input {
+    padding: 8px;
+    font-size: 14px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+  }
+  @media (max-width: 530px) {
+    .row {
+      flex-wrap: wrap;
+      padding: 5px;
+    }
+  
+    .right {
+      justify-content: flex-start;
+    }
+  
+    .wrapper {
+      padding-top: 100px;
+    }
+  }
+  
