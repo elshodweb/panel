@@ -1,32 +1,29 @@
 "use client";
 
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { fetchDebts } from "@/features/statistics/debtSlice";
-import { RootState, AppDispatch } from "@/store/store"; // Store tiplarini import qilish
-import CustomTable from "@/components/Table/Table";
+import { RootState, AppDispatch } from "@/store/store";
 import Title from "@/components/Title/Title";
 import Snackbar from "@mui/material/Snackbar";
 import MuiAlert from "@mui/material/Alert";
 import TableStatistics from "@/components/TableStatistics/TableStatistics";
+import MyPagination from "@/components/Pagination/Pagination";
 
 const StatisticsPage = () => {
   const dispatch = useDispatch<AppDispatch>();
-  const { debts, status, error, totals } = useSelector(
+  const { debts, status, error, totals, pagination } = useSelector(
     (state: RootState) => state.debtStatistics
   );
 
-  const [snackbarOpen, setSnackbarOpen] = React.useState(false);
-  const [snackbarMessage, setSnackbarMessage] = React.useState("");
-  const [snackbarSeverity, setSnackbarSeverity] = React.useState<
-    "success" | "error"
-  >("success");
+  const [snackbarOpen, setSnackbarOpen] = useState(false);
+  const [snackbarMessage, setSnackbarMessage] = useState("");
+  const [snackbarSeverity, setSnackbarSeverity] = useState<"success" | "error">("success");
+  const [pageSize, setPageSize] = useState(10);
 
   useEffect(() => {
-    if (status === "idle") {
-      dispatch(fetchDebts({ pageNumber: 1, pageSize: 10 }));
-    }
-  }, [dispatch, status]);
+    dispatch(fetchDebts({ pageNumber: 1, pageSize }));
+  }, [dispatch, pageSize]);
 
   useEffect(() => {
     if (error) {
@@ -40,26 +37,18 @@ const StatisticsPage = () => {
     setSnackbarOpen(false);
   };
 
-  const showSnackbar = (message: string, severity: "success" | "error") => {
-    setSnackbarMessage(message);
-    setSnackbarSeverity(severity);
-    setSnackbarOpen(true);
-  };
-
   return (
     <div>
       <Title>Qarz Statistikasi</Title>
 
-      <Snackbar
-        open={snackbarOpen}
-        autoHideDuration={6000}
-        onClose={handleSnackbarClose}
-      >
+      <Snackbar open={snackbarOpen} autoHideDuration={6000} onClose={handleSnackbarClose}>
         <MuiAlert onClose={handleSnackbarClose} severity={snackbarSeverity}>
           {snackbarMessage}
         </MuiAlert>
       </Snackbar>
 
+      <p>Jami Faol Qarz: {totals.totalActiveDebtSum} so'm</p>
+      <p>Jami Faol Emas Qarz: {totals.totalNotActiveDebtSum} so'm</p>
       <div>
         <h3>Qarzlar Ro‘yxati</h3>
         <TableStatistics
@@ -71,8 +60,15 @@ const StatisticsPage = () => {
             remaining_debt: debt.remaining_debt ?? "N/A",
           }))}
         />
-        <p>Jami Faol Qarz: {totals.totalActiveDebtSum} so'm</p>
-        <p>Jami Faol Emas Qarz: {totals.totalNotActiveDebtSum} so'm</p>
+        <MyPagination
+          currentPage={+pagination.currentPage}
+          onPageChange={(event, page) => {
+            dispatch(fetchDebts({ pageNumber: page, pageSize }));
+          }}
+          pageSize={pageSize}
+          setPageSize={setPageSize}
+          totalPages={+pagination.totalPages}
+        />
       </div>
     </div>
   );

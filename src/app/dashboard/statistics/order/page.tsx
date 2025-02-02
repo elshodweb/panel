@@ -1,29 +1,30 @@
 "use client";
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { fetchOrders } from "@/features/statistics/orderSlice";
-import { RootState, AppDispatch } from "@/store/store"; // Store turlarini import qilish
-import CustomTable from "@/components/Table/Table";
+import { RootState, AppDispatch } from "@/store/store";
 import Title from "@/components/Title/Title";
 import Snackbar from "@mui/material/Snackbar";
 import MuiAlert from "@mui/material/Alert";
 import TableStatistics from "@/components/TableStatistics/TableStatistics";
+import MyPagination from "@/components/Pagination/Pagination";
 
 const OrderStatisticsPage = () => {
   const dispatch = useDispatch<AppDispatch>();
-  const { orders, status, error, totals } = useSelector(
+  const { orders, status, error, totals, pagination } = useSelector(
     (state: RootState) => state.orderStatistics
   );
 
-  const [snackbarOpen, setSnackbarOpen] = React.useState(false);
-  const [snackbarMessage, setSnackbarMessage] = React.useState("");
-  const [snackbarSeverity, setSnackbarSeverity] = React.useState<"success" | "error">("success");
+  const [snackbarOpen, setSnackbarOpen] = useState(false);
+  const [snackbarMessage, setSnackbarMessage] = useState("");
+  const [snackbarSeverity, setSnackbarSeverity] = useState<"success" | "error">("success");
+
+  const [pageSize, setPageSize] = useState(10);
+  const [currentPage, setCurrentPage] = useState(1);
 
   useEffect(() => {
-    if (status === "idle") {
-      dispatch(fetchOrders({ pageNumber: 1, pageSize: 10 }));
-    }
-  }, [dispatch, status]);
+    dispatch(fetchOrders({ pageNumber: currentPage, pageSize }));
+  }, [dispatch, currentPage, pageSize]);
 
   useEffect(() => {
     if (error) {
@@ -37,12 +38,6 @@ const OrderStatisticsPage = () => {
     setSnackbarOpen(false);
   };
 
-  const showSnackbar = (message: string, severity: "success" | "error") => {
-    setSnackbarMessage(message);
-    setSnackbarSeverity(severity);
-    setSnackbarOpen(true);
-  };
-
   return (
     <div>
       <Title>Buyurtma Statistikasi</Title>
@@ -53,6 +48,8 @@ const OrderStatisticsPage = () => {
         </MuiAlert>
       </Snackbar>
 
+      <p>Jami narx: {totals.totalPriceSum} so'm</p>
+      <p>Jami to‘langan: {totals.totalPaidSum} so'm</p>
       <div>
         <h3>Buyurtmalar ro‘yxati</h3>
         <TableStatistics
@@ -64,8 +61,13 @@ const OrderStatisticsPage = () => {
             total_price: order.total_price ?? "N/A",
           }))}
         />
-        <p>Jami narx: {totals.totalPriceSum} so'm</p>
-        <p>Jami to‘langan: {totals.totalPaidSum} so'm</p>
+        <MyPagination
+          currentPage={+pagination.currentPage}
+          onPageChange={(event, page) => setCurrentPage(page)}
+          pageSize={pageSize}
+          setPageSize={setPageSize}
+          totalPages={+pagination.totalPages}
+        />
       </div>
     </div>
   );

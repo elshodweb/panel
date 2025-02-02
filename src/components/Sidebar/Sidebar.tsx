@@ -80,14 +80,14 @@ const Sidebar: FC<SidebarProps> = ({ selected, setSelected }) => {
       key: "maxsulotlar",
       children: [
         {
-          id: 11,
+          id: 2,
           name: "Pr. Categories",
           icon: <FaTags />,
           key: "product-categories",
           href: "/dashboard/products/categories",
         },
         {
-          id: 12,
+          id: 3,
           name: "Maxsulotlar",
           icon: <FaClipboardList />,
           key: "product-list",
@@ -96,20 +96,20 @@ const Sidebar: FC<SidebarProps> = ({ selected, setSelected }) => {
       ],
     },
     {
-      id: 3,
+      id: 4,
       name: "Sotuv",
       icon: <FaShoppingCart />,
       key: "sotuv",
       children: [
         {
-          id: 31,
+          id: 5,
           name: "Harid qilish",
           icon: <FaCheck />,
           key: "harid-qilish",
           href: "/dashboard/sotuv/harid-qilish",
         },
         {
-          id: 32,
+          id: 6,
           name: "Haridni tugatish",
           icon: <MdCancelPresentation />,
           key: "harid-tugatish",
@@ -118,27 +118,27 @@ const Sidebar: FC<SidebarProps> = ({ selected, setSelected }) => {
       ],
     },
     {
-      id: 3,
+      id: 7,
       name: "Statistika",
       icon: <FaChartBar />,
       key: "statistics",
       children: [
         {
-          id: 6,
+          id: 8,
           name: "Yetkazib berish",
           icon: <FaCar />,
           key: "yetkazib-berish-statistikasi",
           href: "/dashboard/statistics/car-service",
         },
         {
-          id: 5,
+          id: 9,
           name: "Qarz",
           icon: <FaMoneyBillWave />,
           key: "qarz-statistikasi",
           href: "/dashboard/statistics/debt",
         },
         {
-          id: 5,
+          id: 10,
           name: "Buyurtmalar",
           icon: <FaTags />,
           key: "buyurtmalar-statistikasi",
@@ -147,21 +147,21 @@ const Sidebar: FC<SidebarProps> = ({ selected, setSelected }) => {
       ],
     },
     {
-      id: 2,
+      id: 11,
       name: "Foydalanuvchilar",
       icon: <FaUsers />,
       key: "users",
       href: "/dashboard/users",
     },
     {
-      id: 4,
+      id: 12,
       name: "Qarz",
       icon: <FaMoneyBillWave />,
       key: "qarz",
       href: "/dashboard/qarz",
     },
     {
-      id: 5,
+      id: 13,
       name: "Mashina",
       icon: <FaCar />,
       key: "mashina",

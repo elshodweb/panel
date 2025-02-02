@@ -1,14 +1,14 @@
 "use client";
 
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { fetchCarServiceStatistics } from "@/features/statistics/statisticsLice";
 import { RootState, AppDispatch } from "@/store/store"; // AppDispatchni to‘g‘ri import qilish
-import CustomTable from "@/components/Table/Table";
 import Title from "@/components/Title/Title";
 import Snackbar from "@mui/material/Snackbar";
 import MuiAlert from "@mui/material/Alert";
 import TableStatistics from "@/components/TableStatistics/TableStatistics";
+import MyPagination from "@/components/Pagination/Pagination";
 
 const StatisticsPage = () => {
   const dispatch = useDispatch<AppDispatch>(); // Dispatch funktsiyasini to‘g‘ri belgilash
@@ -16,6 +16,7 @@ const StatisticsPage = () => {
     data: carServiceData,
     status,
     error,
+    pagination,
     totals,
   } = useSelector((state: RootState) => state.carService);
 
@@ -24,12 +25,11 @@ const StatisticsPage = () => {
   const [snackbarSeverity, setSnackbarSeverity] = React.useState<
     "success" | "error"
   >("success");
+  const [pageSize, setPageSize] = useState(10);
 
   useEffect(() => {
-    if (status === "idle") {
-      dispatch(fetchCarServiceStatistics({ pageNumber: 1, pageSize: 10 }));
-    }
-  }, [dispatch, status]);
+    dispatch(fetchCarServiceStatistics({ pageNumber: 1, pageSize }));
+  }, [dispatch, pageSize]);
 
   const handleSnackbarClose = () => {
     setSnackbarOpen(false);
@@ -62,6 +62,10 @@ const StatisticsPage = () => {
       </Snackbar>
 
       <div>
+        <p>Jami Foyda: {totals.totalProfit ? totals.totalProfit : 0} so'm</p>
+        <p>
+          Jami Xarajat: {totals.totalExpense ? totals.totalExpense : 0} so'm
+        </p>
         <h3>Avtomobil Xizmatlari ro‘yxati</h3>
         <TableStatistics
           keys={["profit_or_expense", "price", "comment", "create_data"]}
@@ -72,10 +76,15 @@ const StatisticsPage = () => {
               service.profit_or_expense === "profit" ? "Foyda" : "Xarajat",
           }))}
         />
-        <p>Jami Foyda: {totals.totalProfit ? totals.totalProfit : 0} so'm</p>
-        <p>
-          Jami Xarajat: {totals.totalExpense ? totals.totalExpense : 0} so'm
-        </p>
+        <MyPagination
+          currentPage={+pagination.currentPage}
+          onPageChange={(event, page) => {
+            dispatch(fetchCarServiceStatistics({ pageNumber: page, pageSize }));
+          }}
+          pageSize={pageSize}
+          setPageSize={setPageSize}
+          totalPages={+pagination.totalPages}
+        />
       </div>
     </div>
   );

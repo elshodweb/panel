@@ -143,7 +143,7 @@ const OrderPage = () => {
   return (
     <div className={styles.wrapper}>
       <div className={styles.row}>
-        <Title>Orders</Title>
+        <Title>Buyurymalar</Title>
 
         <div className={styles.datePicker}>
           <label>Boshlanish sanasi:</label>

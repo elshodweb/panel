@@ -17,9 +17,6 @@ const MyPagination: React.FC<PaginationProps> = ({
   pageSize,
   setPageSize,
 }) => {
-  if (totalPages < 2) {
-    return "";
-  }
   return (
     <div className={styles.paginationWrapper}>
       <Pagination
@@ -40,7 +37,7 @@ const MyPagination: React.FC<PaginationProps> = ({
           <MenuItem value={5}>5</MenuItem>
           <MenuItem value={10}>10</MenuItem>
           <MenuItem value={20}>20</MenuItem>
-          <MenuItem value={20}>100</MenuItem>
+          <MenuItem value={100}>100</MenuItem>
         </Select>
       </FormControl>
     </div>
