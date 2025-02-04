@@ -82,7 +82,6 @@ const UsersPage = () => {
     setSelectedUser(null);
     setIsModalOpen(true);
   };
-  console.log(isEditMode);
 
   const handleFormSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
