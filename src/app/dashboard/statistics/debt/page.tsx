@@ -102,9 +102,23 @@ const StatisticsPage = () => {
           {snackbarMessage}
         </MuiAlert>
       </Snackbar>
-
-      <p>Jami Faol Qarz: {totals.totalActiveDebtSum} so'm</p>
-      <p>Jami Faol Emas Qarz: {totals.totalNotActiveDebtSum} so'm</p>
+      <div className={styles.statistics}>
+        <p className={styles.all}>
+          Jami:{" "}
+          {totals.totalNotActiveDebtSum && totals.totalActiveDebtSum
+            ? totals.totalNotActiveDebtSum + totals.totalActiveDebtSum
+            : 0}{" "}
+          so'm
+        </p>
+        <p className={styles.expence}>
+          To'langan:{" "}
+          {totals.totalNotActiveDebtSum ? totals.totalNotActiveDebtSum : 0} so'm
+        </p>
+        <p className={styles.residual}>
+          Qarz: {totals.totalActiveDebtSum ? totals.totalActiveDebtSum : 0}{" "}
+          so'm
+        </p>
+      </div>
       <div>
         <h3>Qarzlar Ro‘yxati</h3>
         <TableStatistics

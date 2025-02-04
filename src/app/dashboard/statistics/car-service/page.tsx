@@ -112,10 +112,22 @@ const StatisticsPage = () => {
       </Snackbar>
 
       <div>
-        <p>Jami Foyda: {totals.totalProfit ? totals.totalProfit : 0} so'm</p>
-        <p>
-          Jami Xarajat: {totals.totalExpense ? totals.totalExpense : 0} so'm
-        </p>
+        <div className={styles.statistics}>
+          <p className={styles.all}>
+            Jami : {totals.totalProfit ? totals.totalProfit : 0} so'm
+          </p>
+          <p className={styles.expence}>
+            Xarajat: {totals.totalExpense ? totals.totalExpense : 0} so'm
+          </p>
+
+          <p className={styles.residual}>
+            Qolgani:{" "}
+            {totals.totalExpense && totals.totalProfit
+              ? totals.totalProfit - totals.totalExpense
+              : 0}{" "}
+            so'm
+          </p>
+        </div>
         <h3>Avtomobil Xizmatlari ro‘yxati</h3>
         <TableStatistics
           keys={["profit_or_expense", "price", "comment", "create_data"]}

@@ -53,6 +53,23 @@
     width: 100%;
     align-items: flex-end;
   }
+  .statistics{
+    display: flex;
+    gap: 10px;
+    p{
+      padding: 15px;
+      border-radius: 7px;
+    }
+  }
+  .all{
+    background: #6bce8f;
+  }
+  .expence{
+    background: #6d8bcb;
+  }
+  .residual{
+    background: #cb639c;
+  }
   @media (max-width: 924px) {
     .row {
       flex-wrap: wrap;

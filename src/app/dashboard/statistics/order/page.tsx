@@ -102,9 +102,23 @@ const OrderStatisticsPage = () => {
           {snackbarMessage}
         </MuiAlert>
       </Snackbar>
+      <div className={styles.statistics}>
+        <p className={styles.all}>
+          Jami : {totals.totalPriceSum ? totals.totalPriceSum : 0} so'm
+        </p>
+        <p className={styles.expence}>
+          Xarajat: {totals.totalPaidSum ? totals.totalPaidSum : 0} so'm
+        </p>
 
-      <p>Jami narx: {totals.totalPriceSum} so'm</p>
-      <p>Jami to‘langan: {totals.totalPaidSum} so'm</p>
+        <p className={styles.residual}>
+          Qolgani:{" "}
+          {totals.totalPaidSum && totals.totalPriceSum
+            ? totals.totalPriceSum - totals.totalPaidSum
+            : 0}{" "}
+          so'm
+        </p>
+      </div>
+      <p>Jami to‘langan: {} so'm</p>
       <div>
         <h3>Buyurtmalar ro‘yxati</h3>
         <TableStatistics
