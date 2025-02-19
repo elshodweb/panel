@@ -15,6 +15,7 @@ import { fetchAllCategories } from "@/features/productCategory/allCategories";
 import { Autocomplete, Snackbar, TextField } from "@mui/material";
 import MuiAlert from "@mui/material/Alert";
 import Loader from "@/components/Loader/Loader";
+import ProductTable from "@/components/ProductTable/ProductTable";
 const Alert = forwardRef<HTMLDivElement, React.ComponentProps<typeof MuiAlert>>(
   function Alert(props, ref) {
     return <MuiAlert elevation={6} ref={ref} variant="filled" {...props} />;
@@ -253,9 +254,27 @@ const Page = () => {
                 if (!isNaN(parseFloat(e.target.value))) {
                   setId(parseFloat(e.target.value) + "");
                   setSearch("");
+                  dispatch(
+                    fetchProducts({
+                      pageNumber: 1,
+                      pageSize: pageSize,
+                      searchTitle: "",
+                      searchable_title_id: parseFloat(e.target.value) + "",
+                      category_id: category,
+                    })
+                  );
                 } else {
                   setSearch(e.target.value);
                   setId("");
+                  dispatch(
+                    fetchProducts({
+                      pageNumber: 1,
+                      pageSize: pageSize,
+                      searchTitle: e.target.value,
+                      searchable_title_id: "",
+                      category_id: category,
+                    })
+                  );
                 }
               }}
               placeholder="Qidirish (Nomi, Id)"
@@ -296,7 +315,7 @@ const Page = () => {
       {status === "failed" && <p>Xatolik: {error}</p>}
       {status === "succeeded" && (
         <>
-          <CustomTable
+          <ProductTable
             keys={[
               "searchable_title_id",
               "title",

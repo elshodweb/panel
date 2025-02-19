@@ -142,7 +142,16 @@ const Page = () => {
         <div className={styles.right}>
           <AddBtn onClick={handleCreate} />
           <Search
-            onChange={(e) => setSearch(e.target.value)}
+            onChange={(e) => {
+              setSearch(e.target.value);
+              dispatch(
+                fetchProductCategories({
+                  title: e.target.value,
+                  pageNumber: pagination.currentPage,
+                  pageSize,
+                })
+              );
+            }}
             onClick={() => {
               dispatch(
                 fetchProductCategories({

@@ -170,7 +170,6 @@ const UsersPage = () => {
     "Izoh",
     "Telefon",
     "Rol",
-    "Parol",
   ];
 
   return (
@@ -183,6 +182,15 @@ const UsersPage = () => {
             onChange={(e) => {
               setSearch(e.target.value);
               setCurrentPage(1);
+
+              dispatch(
+                fetchUsers({
+                  pageNumber: 1,
+                  pageSize,
+                  phone: e.target.value,
+                  role: "",
+                })
+              );
             }}
             placeholder="Qidirish (Telefon)"
             search={search}
@@ -209,24 +217,26 @@ const UsersPage = () => {
               "comment",
               "phone",
               "role",
-              "password",
             ]}
             titles={titles}
-            data={users.map((user: any) => ({
-              id: user.id,
-              image: (
-                <CircularImage
-                  src={user?.img?.includes("https") ? user.img : "/profile.jpg"}
-                />
-              ),
-              first_name: user.first_name,
-              name: user.name,
-              last_name: user.last_name,
-              comment: user.comment,
-              phone: user.phone,
-              role: user.role,
-              password: user.password,
-            }))}
+            data={users
+              .filter((i) => i.role === "user")
+              .map((user: any) => ({
+                id: user.id,
+                image: (
+                  <CircularImage
+                    src={
+                      user?.img?.includes("https") ? user.img : "/profile.jpg"
+                    }
+                  />
+                ),
+                first_name: user.first_name,
+                name: user.name,
+                last_name: user.last_name,
+                comment: user.comment,
+                phone: user.phone,
+                role: user.role,
+              }))}
             onUpdate={handleUpdate}
             onDelete={(user) => {
               setSelectedUser(user);
