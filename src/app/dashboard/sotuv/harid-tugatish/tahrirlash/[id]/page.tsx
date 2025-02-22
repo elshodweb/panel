@@ -156,8 +156,8 @@ const Page = () => {
       fetchUsers({
         pageNumber: 1,
         pageSize: 100,
-        phone: phone,
-        role: "null",
+        search: phone,
+       
       })
     );
   }, [dispatch, phone]);

@@ -48,17 +48,17 @@ const initialState: UserState = {
 
 export const fetchUsers = createAsyncThunk<
   ApiResponse,
-  { pageNumber: number; pageSize: number; phone: string | null; role: string }
+  { pageNumber: number; pageSize: number; search: string | null;  }
 >(
   "users/fetchUsers",
   async (params) => {
-    const { pageNumber, pageSize, phone, role } = params;
+    const { pageNumber, pageSize, search } = params;
     const response = await axiosInstance.get<ApiResponse>(`/Auth/getUser/all`, {
       params: {
         pageNumber,
         pageSize,
-        phone: phone || "null",
-        role: role || "null",
+        search: search || "null",
+        role: "user",
       },
     });
     return response.data;

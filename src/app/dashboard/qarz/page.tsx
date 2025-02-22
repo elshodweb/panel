@@ -22,6 +22,7 @@ import {
 } from "@mui/material";
 import { fetchUsers } from "@/features/users/users";
 import Loader from "@/components/Loader/Loader";
+import UserModalForm from "@/components/UserModalForm/UserModalForm";
 
 const Alert = forwardRef<HTMLDivElement, React.ComponentProps<typeof MuiAlert>>(
   function Alert(props, ref) {
@@ -57,14 +58,17 @@ const DebtPage = () => {
     dayToBeGiven: "",
     dayGiven: "",
   });
+
+    const setUser = (id: string) => {
+      dispatch(fetchUsers({ pageNumber: 1, pageSize: 200, search: "null" }));
+      setFormData({ ...formData, user_id: id });
+    };
   const [isConfirmDeleteOpen, setIsConfirmDeleteOpen] = useState(false);
   const [pageSize, setPageSize] = useState(10);
 
   useEffect(() => {
     dispatch(fetchDebts({ pageNumber: 1, pageSize }));
-    dispatch(
-      fetchUsers({ pageNumber: 1, pageSize: 200, phone: "null", role: "null" })
-    );
+    dispatch(fetchUsers({ pageNumber: 1, pageSize: 200, search: "null" }));
   }, [dispatch, pageSize]);
 
   const handleSnackbarClose = (
@@ -325,7 +329,7 @@ const DebtPage = () => {
                   ))}
                 </Select>
               </FormControl>
-
+              <UserModalForm getIdUser={setUser}></UserModalForm>
               <Button
                 type="submit"
                 variant="contained"

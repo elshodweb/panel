@@ -51,9 +51,7 @@ const UsersPage = () => {
   const [avatar, setAvatar] = useState<File | null>(null);
 
   useEffect(() => {
-    dispatch(
-      fetchUsers({ pageNumber: currentPage, pageSize, phone: search, role: "" })
-    );
+    dispatch(fetchUsers({ pageNumber: currentPage, pageSize, search: search }));
   }, [dispatch, pageSize]);
 
   const showSnackbar = (message: string, severity: "success" | "error") => {
@@ -118,8 +116,7 @@ const UsersPage = () => {
           fetchUsers({
             pageNumber: currentPage,
             pageSize,
-            phone: search,
-            role: "",
+            search: search,
           })
         );
         setIsModalOpen(false);
@@ -148,8 +145,7 @@ const UsersPage = () => {
           fetchUsers({
             pageNumber: currentPage,
             pageSize,
-            phone: search,
-            role: "",
+            search: search,
           })
         );
         setIsConfirmDeleteOpen(false);
@@ -187,18 +183,15 @@ const UsersPage = () => {
                 fetchUsers({
                   pageNumber: 1,
                   pageSize,
-                  phone: e.target.value,
-                  role: "",
+                  search: e.target.value,
                 })
               );
             }}
-            placeholder="Qidirish (Telefon)"
+            placeholder="Qidirish"
             search={search}
             onClick={() => {
               setCurrentPage(1);
-              dispatch(
-                fetchUsers({ pageNumber: 1, pageSize, phone: search, role: "" })
-              );
+              dispatch(fetchUsers({ pageNumber: 1, pageSize, search: search }));
             }}
           />
         </div>
@@ -251,8 +244,7 @@ const UsersPage = () => {
                 fetchUsers({
                   pageNumber: page,
                   pageSize,
-                  phone: search,
-                  role: "",
+                  search: search,
                 })
               );
             }}

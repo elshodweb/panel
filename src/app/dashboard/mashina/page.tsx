@@ -22,6 +22,7 @@ import {
 } from "@mui/material";
 import { fetchUsers } from "@/features/users/users";
 import Loader from "@/components/Loader/Loader";
+import UserModalForm from "@/components/UserModalForm/UserModalForm";
 
 // Компонент Alert для уведомлений
 const Alert = forwardRef<HTMLDivElement, React.ComponentProps<typeof MuiAlert>>(
@@ -62,7 +63,10 @@ const CarServicePage = () => {
   const [profitOrExpenseFilter, setProfitOrExpenseFilter] = useState<
     string | null
   >(null);
-
+  const setUser = (id: string) => {
+    dispatch(fetchUsers({ pageNumber: 1, pageSize: 200, search: "null" }));
+    setFormData({ ...formData, user_id: id });
+  };
   useEffect(() => {
     dispatch(
       fetchCarServices({
@@ -75,8 +79,7 @@ const CarServicePage = () => {
       fetchUsers({
         pageNumber: 1,
         pageSize: 200,
-        phone: "null",
-        role: "null",
+        search: "null",
       })
     );
   }, [dispatch, pageSize, profitOrExpenseFilter]);
@@ -154,7 +157,6 @@ const CarServicePage = () => {
       : "/car-service/create";
 
     try {
-
       const response = await axiosInstance({
         method: isEditMode ? "patch" : "post",
         url: endpoint,
@@ -298,7 +300,6 @@ const CarServicePage = () => {
                 fullWidth
                 margin="normal"
               />
-
               {/* Select for Users */}
               <FormControl fullWidth margin="normal">
                 <InputLabel id="users-label">Foydalanuvchi</InputLabel>
@@ -312,14 +313,14 @@ const CarServicePage = () => {
                   required
                 >
                   {/* <MenuItem value={"null"}>Olib tashlash</MenuItem> */}
-                  {users.map((user,i) => (
+                  {users.map((user, i) => (
                     <MenuItem key={i} value={user.id}>
                       {user.name}
                     </MenuItem>
                   ))}
                 </Select>
               </FormControl>
-
+              <UserModalForm getIdUser={setUser}></UserModalForm>
               <Button
                 type="submit"
                 variant="contained"

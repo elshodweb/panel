@@ -4,7 +4,7 @@ import styles from "./styles.module.scss";
 import Title from "@/components/Title/Title";
 import { Autocomplete, TextField, Button } from "@mui/material";
 import { useDispatch, useSelector } from "react-redux";
-import { AppDispatch, RootState } from "@/store/store";
+import { AppDispatch, RootState, store } from "@/store/store";
 import { fetchUsers } from "@/features/users/users";
 import { fetchProducts } from "@/features/products/products";
 import { fetchProductCategories } from "@/features/productCategory/productCategorySlice";
@@ -26,6 +26,7 @@ import {
 } from "../../../../../types";
 import { useReactToPrint } from "react-to-print";
 import UserDataSummary from "@/components/Check/Check";
+import UserModalForm from "@/components/UserModalForm/UserModalForm";
 
 const Page = () => {
   const dispatch = useDispatch<AppDispatch>();
@@ -89,9 +90,8 @@ const Page = () => {
     dispatch(
       fetchUsers({
         pageNumber: 1,
-        pageSize: 100,
-        phone: phone,
-        role: "null",
+        pageSize: 200,
+        search: phone,
       })
     );
   }, [dispatch, phone]);
@@ -339,9 +339,20 @@ const Page = () => {
       )
     );
   };
+  const setUser = async (id: string) => {
+    await dispatch(fetchUsers({ pageNumber: 1, pageSize: 200, search: phone }));
+
+    const updatedUsers = store.getState().users.users; // Получаем актуальные данные из стора
+    const user = updatedUsers.find((user) => user.id === id);
+
+    if (user) {
+      setPhone(user.phone);
+      setSelectedUser(user);
+    }
+  };
 
   return (
-    <form onSubmit={handleSubmit} className={styles.wrapper}>
+    <form autoComplete="off" onSubmit={handleSubmit} className={styles.wrapper}>
       <div className={styles.row}>
         <Title>Harid qilish</Title>
       </div>
@@ -366,6 +377,7 @@ const Page = () => {
               isOptionEqualToValue={(option, value) =>
                 option.phone === value.phone
               }
+              autoComplete={false}
               renderInput={(params) => (
                 <TextField
                   required
@@ -373,6 +385,14 @@ const Page = () => {
                   size="small"
                   label="Telefon nomer"
                   variant="outlined"
+                  autoComplete="off"
+                  inputProps={{
+                    ...params.inputProps,
+                    autoComplete: "new-password",
+                  }}
+                  name={`phone-${Math.random()}`} // Уникальное имя
+                  id={`phone-${Math.random()}`} // Уникальный id
+                  value={phone}
                   onChange={(e) => setPhone(e.target.value)}
                 />
               )}
@@ -384,6 +404,7 @@ const Page = () => {
                 <p>Telefon: {selectedUser.phone}</p>
               </div>
             )}
+            <UserModalForm getIdUser={setUser}></UserModalForm>
           </div>
 
           {sections.map((section, index) => (
